@@ -9,6 +9,8 @@ public class Weapon : MonoBehaviour
     [SerializeField] protected float UnloadTime;
     [SerializeField] protected float CurrentAmmo;
     [SerializeField] protected int MaxAmmo;
+    [SerializeField] protected Transform FirePoint;
+    protected PlayerController Player;
     protected int Ammo;
     protected float CurrReloadTime;
     protected float CurrUnloadTime;
@@ -18,13 +20,13 @@ public class Weapon : MonoBehaviour
         return new List<int> {Ammo, MaxAmmo};
     }
 
-    protected void CheckReload(bool ReloadInput) {
-        if(!IsReloading && ReloadInput) {
+    protected void CheckReload() {
+        if(!IsReloading && InputManager.Instance.ReloadInputPress && Ammo < MaxAmmo) {
             Reload();
         }
 
         if(IsReloading) {
-            if(CurrReloadTime + ReloadTime <= Time.time) {
+            if(CurrReloadTime < 0) {
                 Ammo = MaxAmmo;
                 IsReloading = false;
             }
@@ -32,7 +34,19 @@ public class Weapon : MonoBehaviour
     }
 
     protected void Reload() {
-        CurrReloadTime = Time.time;
+        CurrReloadTime = ReloadTime;
         IsReloading = true;
+    }
+
+    protected virtual void Update() {
+        CheckReload();
+        Timer();
+    }
+
+    protected void Timer() {
+        if(IsReloading) {
+            CurrReloadTime -= Time.deltaTime;
+        }
+        CurrUnloadTime -= Time.deltaTime;
     }
  }

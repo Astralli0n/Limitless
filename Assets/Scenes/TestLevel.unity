@@ -634,10 +634,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e1114bf2614c614ea17a993e74a3206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RunSpeed: 10
-  StrafeSpeed: 7.5
+  RunSpeed: 15
+  StrafeSpeed: 10
   BackSpeed: 5
-  Acceleration: 13
+  Acceleration: 19
   Deceleration: 19
   State: 0
   Posture: 0
@@ -653,12 +653,12 @@ MonoBehaviour:
   MaxSprintVel: 7.5
   SprintAccelModifier: 0.75
   SprintLerpTime: 0.5
-  CrouchSpeedModifier: 0.25
+  CrouchSpeedModifier: 0.5
   CrouchCamModifier: 0.75
   CrouchOverlapPoint: {fileID: 943847356}
   CrouchOverlapRayDist: 1
   ColliderHeightModifier: 0.75
-  SlideAccelModifier: 0.05
+  SlideAccelModifier: 0.025
   SlideSpeedModifier: 3
   MinSlideVel: 0
   MaxSlideVel: 9
@@ -675,16 +675,15 @@ MonoBehaviour:
   JumpBufferTime: 0.2
   GroundFriction: 2.2
   AirFriction: 1.1
-  JumpForce: 12.5
-  JumpCutForce: 0.5
+  JumpForce: 10
+  JumpCutForce: 5
   FallGravityForce: 5
   ApexModifier: 1.5
   ApexThreshold: 0.2
   ApexGravityForce: 5
-  EdgeDetectionDistance: 0.5
-  EdgeStepHeight: 0.1
-  EdgeStepLerpSpeed: 0.5
-  MaxEdgeStepHeight: 0.3
+  EdgeDetectionDistance: 2
+  EdgeStepHeight: 2
+  EdgeStepLerpSpeed: 0.9
   UI: {fileID: 1418197854}
   VelMeter: {fileID: 596742526}
 --- !u!1 &319318584

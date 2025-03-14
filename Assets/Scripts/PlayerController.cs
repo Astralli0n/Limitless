@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform CameraHolder;
     [SerializeField] float CameraFOV;
     [SerializeField] float CamLerpSpeed;
+    public Vector3 AimDir;
     Camera Cam;
     Vector3 CameraDefaultPos;
     float xRot = 0f;
@@ -87,10 +88,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float ApexThreshold;
     [SerializeField] float ApexGravityForce;
     [Header("Edge Detection")]
-    [SerializeField] float EdgeDetectionDistance = 0.5f;
-    [SerializeField] float EdgeStepHeight = 0.1f;
+    [SerializeField] float EdgeDetectionDistance;
+    [SerializeField] float EdgeStepHeight;
     [SerializeField] float EdgeStepLerpSpeed;
-    [SerializeField] float MaxEdgeStepHeight = 0.3f;
     bool IsJumping;
     public TMP_Text UI;//FOR DEBUGGING STATES
     public TMP_Text VelMeter;
@@ -156,7 +156,6 @@ public class PlayerController : MonoBehaviour
 
         if(IsJumping && Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
             CurrentModifier *= ApexModifier;
-            RB.AddForce(Vector3.up * ApexGravityForce);
         }
 
         TargetSpeedModifier = Mathf.Lerp(TargetSpeedModifier, 
@@ -242,30 +241,30 @@ public class PlayerController : MonoBehaviour
 
         if(Posture == PostureState.Crouch && SlideVelWithinBounds) {
             State = MovementState.Slide;
-        } else if(ShouldSprint) {
+        } else if(ShouldSprint && (Posture == PostureState.Air && State == MovementState.Slide || Posture == PostureState.Stand && State != MovementState.Slide)) {
             State = MovementState.Sprint;
         }
     }
 
     void HandleEdgeDetection()
     {
-        if (Posture != PostureState.Air) return;
+        if (Posture != PostureState.Air || RB.linearVelocity.magnitude < 0.1f) return;
 
-        Vector3 MoveDir = new Vector3(
-            RB.linearVelocity.x, 
-            0, 
-            RB.linearVelocity.z
-        ).normalized;
+        Vector3 ForwardDir = new Vector3(RB.linearVelocity.x, 0f, RB.linearVelocity.z);
 
-        if (Physics.Raycast(transform.position, MoveDir, out RaycastHit HitInfo, EdgeDetectionDistance))
-        {
-            Vector3 StepUpOrigin = transform.position + MoveDir * EdgeDetectionDistance;
-            StepUpOrigin.y += EdgeStepHeight;
+        Vector3 RayOrigin = RB.position + Vector3.up * EdgeStepHeight;
 
-            if (!Physics.Raycast(StepUpOrigin, Vector3.down, GroundRayDist, GroundLayer))
-            {
-                Vector3 TargetPos = RB.position + Vector3.up * Mathf.Min(EdgeStepHeight, MaxEdgeStepHeight);
-                RB.position = Vector3.Lerp(RB.position, TargetPos, EdgeStepLerpSpeed * Time.deltaTime);
+        Debug.DrawRay(RayOrigin, ForwardDir * EdgeDetectionDistance, Color.green);
+
+        if(!Physics.Raycast(RayOrigin, ForwardDir, out RaycastHit Hit, EdgeDetectionDistance)) {
+            float Dist = Vector2.Distance(new Vector2(RB.position.x, RB.position.z), new Vector2(Hit.point.x, Hit.point.z));
+            RayOrigin = RayOrigin + ForwardDir * Dist;
+
+            Debug.DrawRay(RayOrigin, Vector3.down * EdgeStepHeight, Color.red);
+
+            if(Physics.Raycast(RayOrigin, Vector3.down, out RaycastHit TopHit, EdgeStepHeight, GroundLayer)) {
+                Vector3 TargetPos = ForwardDir + Vector3.up * (TopHit.point.y + PlayerCollider.height * 0.5f);
+                RB.MovePosition(Vector3.Lerp(RB.position, TargetPos, EdgeStepLerpSpeed));
             }
         }
     }
@@ -403,6 +402,10 @@ public class PlayerController : MonoBehaviour
 
             if(RB.linearVelocity.y < 0) {
                 RB.AddForce(Vector3.down * FallGravityForce);
+            }
+
+            if(Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
+                RB.AddForce(Vector3.up * ApexGravityForce);
             }
         }
     }

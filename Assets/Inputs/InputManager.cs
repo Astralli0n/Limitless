@@ -12,6 +12,10 @@ public class InputManager : MonoBehaviour
     public bool JumpInputRelease = false;
     public bool SprintInput;
     public bool CrouchInput;
+    public bool FireInput;
+    public bool FireInputPress = false;
+    public bool FireInputRelease = false;
+    public bool ReloadInputPress;
 
     void Awake() {
         if(Instance == null) {
@@ -24,6 +28,11 @@ public class InputManager : MonoBehaviour
     void LateUpdate() {
         JumpInputPress = false;
         JumpInputRelease = false;
+
+        FireInputPress = false;
+        FireInputRelease = false;
+
+        ReloadInputPress = false;
     }
 
     public void SetMove(InputAction.CallbackContext CTX) {
@@ -35,16 +44,26 @@ public class InputManager : MonoBehaviour
     }
 
     public void SetJump(InputAction.CallbackContext CTX) {
-        // When using ReadValue for buttons, 1 = pressed, 0 = not pressed
         JumpInput = CTX.ReadValue<float>() > 0f;
         
-        // For Press detection - use the Performed phase
         if (CTX.phase == InputActionPhase.Performed) {
-            JumpInputPress = true;  // True for 1 frame
+            JumpInputPress = true;
         }
-        // For Release detection - use the Canceled phase
+
         else if (CTX.phase == InputActionPhase.Canceled) {
-            JumpInputRelease = true;  // True for 1 frame
+            JumpInputRelease = true;
+        }
+    }
+
+    public void SetFire(InputAction.CallbackContext CTX) {
+        FireInput = CTX.ReadValue<float>() > 0f;
+        
+        if (CTX.phase == InputActionPhase.Performed) {
+            FireInputPress = true;
+        }
+
+        else if (CTX.phase == InputActionPhase.Canceled) {
+            FireInputRelease = true;
         }
     }
 
@@ -54,5 +73,11 @@ public class InputManager : MonoBehaviour
 
     public void SetCrouch(InputAction.CallbackContext CTX) {
         CrouchInput = CTX.ReadValue<float>() > 0f;
+    }
+
+    public void SetReload(InputAction.CallbackContext CTX) {
+        if (CTX.phase == InputActionPhase.Performed) {
+            ReloadInputPress = true;
+        }
     }
 }
