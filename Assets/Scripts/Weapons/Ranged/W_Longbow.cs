@@ -1,14 +1,16 @@
 using UnityEngine;
 
+[RequireComponent(typeof(T_Chargeable))]
 public class W_Longbow : T_Ranged
 {
     [Header("Specific Stats")]
     [SerializeField] float MaxRange;
     T_Chargeable ChargeComponent;
 
-    void Awake() {
+    protected override void Awake() {
+        base.Awake();
         ChargeComponent = GetComponent<T_Chargeable>();
-        Player = transform.parent.GetComponent<PlayerController>();
+        Player = transform.parent.parent.GetComponent<PlayerController>();
     }
 
     protected override void Update() {
@@ -25,5 +27,6 @@ public class W_Longbow : T_Ranged
         var FireRange = (HoldDuration * (MaxRange - Range)) + Range;
 
         GameObject Projectile = CheckFire(Player.AimDir);
+        Projectile.GetComponent<P_Bullet>().SetStats(FireRange, Damage, FirePoint.position, transform.parent.parent);
     }
 }

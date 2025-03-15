@@ -7,27 +7,31 @@ public class Weapon : MonoBehaviour
     [SerializeField] protected float Damage;
     [SerializeField] protected float ReloadTime;
     [SerializeField] protected float UnloadTime;
-    [SerializeField] protected float CurrentAmmo;
     [SerializeField] protected int MaxAmmo;
     [SerializeField] protected Transform FirePoint;
     protected PlayerController Player;
-    protected int Ammo;
+    [SerializeField] protected int CurrentAmmo;
     protected float CurrReloadTime;
     protected float CurrUnloadTime;
     bool IsReloading;
+
+    protected virtual void Awake() {
+        Debug.Log($"Weapon Awake: CurrentAmmo set to {CurrentAmmo}");
+        CurrentAmmo = MaxAmmo;
+    }
     
     protected List<int> ReturnAmmoStats() {
-        return new List<int> {Ammo, MaxAmmo};
+        return new List<int> {CurrentAmmo, MaxAmmo};
     }
 
     protected void CheckReload() {
-        if(!IsReloading && InputManager.Instance.ReloadInputPress && Ammo < MaxAmmo) {
+        if(!IsReloading && InputManager.Instance.ReloadInputPress && CurrentAmmo < MaxAmmo) {
             Reload();
         }
 
         if(IsReloading) {
             if(CurrReloadTime < 0) {
-                Ammo = MaxAmmo;
+                CurrentAmmo = MaxAmmo;
                 IsReloading = false;
             }
         }

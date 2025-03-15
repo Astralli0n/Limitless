@@ -10,6 +10,7 @@ public class P_Bullet : MonoBehaviour
 
     void LateUpdate() {
         if(Vector3.Distance(transform.position, InitPos) > Range) {
+            Debug.Log("BULLET LEFT RANGE");
             Destroy(gameObject);
         }
     }
@@ -19,13 +20,17 @@ public class P_Bullet : MonoBehaviour
         DMG = _DMG;
         InitPos = Pos;
         Player = Origin;
+        Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
     }
 
     void OnCollisionEnter(Collision Other)
     {
-        if(DealtDMG) { return; }
-
-        DealtDMG = true;
+        var OtherHealth = Other.transform.GetComponent<Health>();
+        if(DealtDMG || Other.transform == transform) { return; }
+        if(OtherHealth != null) {
+            OtherHealth.TakeDamage(DMG);
+            DealtDMG = true;
+        }
         Destroy(gameObject);
     }
 }

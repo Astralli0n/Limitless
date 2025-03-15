@@ -193,6 +193,8 @@ public class PlayerController : MonoBehaviour
         transform.Rotate(Vector3.up * MouseX);
         RB.MoveRotation(Quaternion.Slerp(RB.rotation, Quaternion.Euler(RB.rotation.eulerAngles + Vector3.up * MouseX), CamLerpSpeed));
 
+        AimDir = CameraHolder.forward;
+
         var T = Time.deltaTime / StateLerpTime;
 
         var TargetFOV = CameraFOV;

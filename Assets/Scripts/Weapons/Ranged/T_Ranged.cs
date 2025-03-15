@@ -11,9 +11,8 @@ public class T_Ranged : Weapon
     [SerializeField] protected GameObject ProjectilePrefab;
 
     protected bool CanFire() {
-        if(Ammo <= 0) { return false; }
-
-        if(Input.GetMouseButtonUp(0) && CurrUnloadTime <= 0) {
+        if(CurrentAmmo <= 0) { return false; }
+        if(InputManager.Instance.FireInputRelease && CurrUnloadTime < 0) {
             return true;
         }
 
@@ -28,7 +27,7 @@ public class T_Ranged : Weapon
             HitscanFire(AimDir);
         }
 
-        Ammo -= 1;
+        CurrentAmmo -= 1;
         CurrUnloadTime = UnloadTime;
         CurrReloadTime = ReloadTime;
 
@@ -37,9 +36,10 @@ public class T_Ranged : Weapon
 
     protected GameObject ProjectileFire(Vector3 AimDir) {
         Vector3 ShootForce = AimDir * ProjectileSpeed;
-        Quaternion AimRot = Quaternion.LookRotation(AimDir, Vector3.up);
+        Quaternion AimRot = Quaternion.LookRotation(AimDir, Vector3.up);    
 
         GameObject Projectile = Instantiate(ProjectilePrefab, FirePoint.position, AimRot);
+        Projectile.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
         Projectile.GetComponent<Rigidbody>().AddForce(ShootForce, ForceMode.Impulse);
         return Projectile;
     }
