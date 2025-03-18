@@ -6325,7 +6325,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Damage: 50
-  ReloadTime: 5
+  ReloadTime: 2
   UnloadTime: 0.2
   MaxAmmo: 10
   FirePoint: {fileID: 970024837}
