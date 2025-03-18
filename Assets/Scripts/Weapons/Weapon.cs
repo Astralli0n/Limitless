@@ -46,10 +46,15 @@ public class Weapon : MonoBehaviour
         }
 
         if(IsReloading) {
+            AmmoParent.GetComponent<Image>().enabled = true;
+            AmmoParent.GetComponent<Image>().fillAmount = (ReloadTime - CurrReloadTime) / ReloadTime / 2f;
             if(CurrReloadTime < 0) {
+                AmmoParent.GetComponent<Image>().fillAmount = 0f;
                 CurrentAmmo = MaxAmmo;
                 IsReloading = false;
             }
+        } else {
+            AmmoParent.GetComponent<Image>().enabled = false;
         }
     }
 
@@ -74,41 +79,28 @@ public class Weapon : MonoBehaviour
     {
         AmmoBar = new List<Image>();
         
-        // Clear any existing ammo segments first
         foreach (Transform child in AmmoParent)
         {
             Destroy(child.gameObject);
         }
 
-        // For a perfect semicircle (180 degrees)
-        float startAngle = 90f;     // Right side (0 degrees)
-        float endAngle = -90f;     // Left side (180 degrees)
+        float InitAngle = 90f;
+        float EndAngle = -90f;
         
         for (int i = 0; i < CurrentAmmo; i++)
         {
-            // Calculate angle in degrees, evenly distributed
-            float angleInDegrees = startAngle + (endAngle - startAngle) * i / (MaxAmmo - 1);
+            float Angle = InitAngle + (EndAngle - InitAngle) * (i - 0.5f) / (MaxAmmo - 1);
             
-            // Convert to radians for position calculation
-            float angleInRadians = angleInDegrees * Mathf.Deg2Rad;
+            GameObject Segment = Instantiate(AmmoSegment, AmmoParent);
+            Segment.name = $"AmmoSegment_{i}";
             
-            // Create the segment
-            GameObject segment = Instantiate(AmmoSegment, AmmoParent);
-            segment.name = $"AmmoSegment_{i}";
+            Segment.GetComponent<RectTransform>().localPosition = Vector3.zero;
+            Segment.GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, Angle - 90);
+            Segment.GetComponent<Image>().fillAmount = 0.5f / MaxAmmo;
             
-            // Set position
-            RectTransform rectTransform = segment.GetComponent<RectTransform>();
-            
-            // Rotate to face outward
-            rectTransform.localRotation = Quaternion.Euler(0, 0, angleInDegrees - 90);
-            segment.GetComponent<Image>().fillAmount = 0.5f / MaxAmmo;
-            
-            // Add to list
-            AmmoBar.Add(segment.GetComponent<Image>());
+            AmmoBar.Add(Segment.GetComponent<Image>());
         }
         
-        // Log confirmation
-        Debug.Log($"Created ammo bar with {AmmoBar.Count} segments");
     }
 
     private IEnumerator UpdateAmmoBarRoutine()
