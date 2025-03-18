@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class T_Chargeable : MonoBehaviour
 {
@@ -31,15 +32,4 @@ public class T_Chargeable : MonoBehaviour
     public float GetChargeRatio() {
         return CurrentChargeTime / MaxChargeTime;
     }
-
-    void Update() {
-        if (InputManager.Instance.FireInputPress) {
-            StartCharging();
-        }
-
-        if (IsCharging) {
-            UpdateCharging();
-        }
-    }
-
 }
