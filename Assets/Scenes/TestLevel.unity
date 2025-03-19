@@ -5323,6 +5323,77 @@ Transform:
   - {fileID: 363236455}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1708122255
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1708122256}
+  - component: {fileID: 1708122258}
+  - component: {fileID: 1708122257}
+  m_Layer: 0
+  m_Name: Crossbow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1708122256
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708122255}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1971863246}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1708122257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708122255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2a82c0fc3d5b2944bc08acb3d132da6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  UsingCharge: 1
+  MaxChargeTime: 2
+--- !u!114 &1708122258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1708122255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b90b0d4d98d44224dab311197f27461c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damage: 75
+  ReloadTime: 2
+  UnloadTime: 1
+  MaxAmmo: 4
+  FirePoint: {fileID: 970024837}
+  AmmoSegment: {fileID: 8867123493312536964, guid: 5a0bfb1799eb8f048a64cd68baa247d5, type: 3}
+  AmmoSpacing: 0
+  CurrentAmmo: 0
+  IsProjectileBased: 1
+  Range: 30
+  ProjectileSpeed: 100
+  ProjectilePrefab: {fileID: 1047940683127342286, guid: 1436bf38e1bb7114fac2f5b809c856ae, type: 3}
 --- !u!1 &1773635356
 GameObject:
   m_ObjectHideFlags: 0
@@ -5431,6 +5502,64 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1773635356}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1787603912
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1787603913}
+  - component: {fileID: 1787603914}
+  m_Layer: 0
+  m_Name: GrenadeLauncher
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1787603913
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787603912}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1971863246}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1787603914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787603912}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7546f4ee9b485b64aaf244eb83ee3d9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damage: 50
+  ReloadTime: 1
+  UnloadTime: 1
+  MaxAmmo: 5
+  FirePoint: {fileID: 970024837}
+  AmmoSegment: {fileID: 8867123493312536964, guid: 5a0bfb1799eb8f048a64cd68baa247d5, type: 3}
+  AmmoSpacing: 0
+  CurrentAmmo: 0
+  IsProjectileBased: 1
+  Range: 10
+  ProjectileSpeed: 10
+  ProjectilePrefab: {fileID: 1047940683127342286, guid: 6e3f63063e7d8f74c84a6f7686e2108a, type: 3}
+  ExplosionRange: 2
+  ExplosionDelay: 2
 --- !u!1 &1799674848
 GameObject:
   m_ObjectHideFlags: 0
@@ -5570,6 +5699,64 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1803597330}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1803875168
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1803875169}
+  - component: {fileID: 1803875170}
+  m_Layer: 0
+  m_Name: RailGun
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1803875169
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803875168}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1971863246}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1803875170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1803875168}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9813df0c7f297a841936f1a9da95b34a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damage: 10
+  ReloadTime: 5
+  UnloadTime: 2
+  MaxAmmo: 4
+  FirePoint: {fileID: 970024837}
+  AmmoSegment: {fileID: 8867123493312536964, guid: 5a0bfb1799eb8f048a64cd68baa247d5, type: 3}
+  AmmoSpacing: 0
+  CurrentAmmo: 0
+  IsProjectileBased: 1
+  Range: 50
+  ProjectileSpeed: 100
+  ProjectilePrefab: {fileID: 1047940683127342286, guid: 89d9df90f0749c74290568c6c8540e8a, type: 3}
+  MaxDMG: 100
+  RangeCutoff: 30
 --- !u!1 &1808958798
 GameObject:
   m_ObjectHideFlags: 0
@@ -6337,7 +6524,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1907233038
 Transform:
   m_ObjectHideFlags: 0
@@ -6365,7 +6552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 344686bee7ede034998cd29b317f04cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 50
+  Damage: 25
   ReloadTime: 2
   UnloadTime: 0.2
   MaxAmmo: 10
@@ -6378,6 +6565,7 @@ MonoBehaviour:
   ProjectileSpeed: 100
   ProjectilePrefab: {fileID: 1047940683127342286, guid: 1436bf38e1bb7114fac2f5b809c856ae, type: 3}
   MaxRange: 20
+  MaxDMG: 75
 --- !u!114 &1907233040
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6544,7 +6732,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1946940928}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -6600,13 +6788,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1962648487}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1034925772}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -6680,6 +6868,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1907233038}
+  - {fileID: 1708122256}
+  - {fileID: 1803875169}
+  - {fileID: 1787603913}
   m_Father: {fileID: 306155441}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2020512088

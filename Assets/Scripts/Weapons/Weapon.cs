@@ -23,7 +23,7 @@ public class Weapon : MonoBehaviour
     protected Image ChargeBar;
     protected Transform AmmoParent;
     protected List<Image> AmmoBar;
-    bool IsReloading;
+    protected bool IsReloading;
 
     protected virtual void Awake() {
         Debug.Log($"Weapon Awake: CurrentAmmo set to {CurrentAmmo}");
@@ -40,7 +40,7 @@ public class Weapon : MonoBehaviour
         return new List<int> {CurrentAmmo, MaxAmmo};
     }
 
-    protected void CheckReload() {
+    protected virtual void CheckReload() {
         if(!IsReloading && InputManager.Instance.ReloadInputPress && CurrentAmmo < MaxAmmo) {
             Reload();
         }

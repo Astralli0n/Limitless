@@ -6,12 +6,14 @@ public class W_Longbow : T_Ranged
 {
     [Header("Specific Stats")]
     [SerializeField] float MaxRange;
+    [SerializeField] float MaxDMG;
     T_Chargeable ChargeComponent;
 
     protected override void Awake() {
         base.Awake();
         ChargeComponent = GetComponent<T_Chargeable>();
         Player = transform.GetComponentInParent<PlayerController>();
+        ChargeBar.enabled = true;
     }
 
     protected override void Update() {
@@ -37,8 +39,9 @@ public class W_Longbow : T_Ranged
     void SetFireStats() {
         var HoldDuration = ChargeComponent.GetChargeRatio();
         var FireRange = (HoldDuration * (MaxRange - Range)) + Range;
+        var FireDMG = (HoldDuration * (MaxDMG - Damage)) + Damage;
 
         GameObject Projectile = CheckFire(Player.AimDir);
-        Projectile.GetComponent<P_Bullet>().SetStats(FireRange, Damage, FirePoint.position, Player.transform);
+        Projectile.GetComponent<P_Bullet>().SetStats(FireRange, FireDMG, FirePoint.position, Player.transform);
     }
 }
