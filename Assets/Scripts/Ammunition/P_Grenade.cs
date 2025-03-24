@@ -6,6 +6,9 @@ public class P_Grenade : MonoBehaviour
     [SerializeField] Transform Player;
     [SerializeField] float Range;
     [SerializeField] float ExplosionRange;
+    [SerializeField] float KnockbackForce;
+    [SerializeField] float InputFreezeDuration;
+    [SerializeField] float ForceDuration;
     [SerializeField] float Damage;
     [SerializeField] float Delay;
     [SerializeField] Vector3 InitPos;
@@ -25,17 +28,21 @@ public class P_Grenade : MonoBehaviour
         }
     }
 
-    public void SetStats(float _Range, float _ExplosionRange, float DMG, float _Delay, Vector3 Pos, Transform Origin) {
+    public void SetStats(float _Range, float _ExplosionRange, float DMG, float _Delay, float FreezeDelay, float _ForceDuration, float Force, Vector3 Pos, Transform Origin) {
         Range = _Range;
         ExplosionRange = _ExplosionRange;
         Damage = DMG;
         Delay = _Delay;
+        InputFreezeDuration = FreezeDelay;
+        ForceDuration = _ForceDuration;
+        KnockbackForce = Force;
         InitPos = Pos;
         Player = Origin;
         Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
     }
 
-    void OnCollisionEnter(Collision Other) {
+    void OnCollisionEnter(Collision Other)
+    {
         if (Other.transform != Player) { 
             AttachedParent = Other.transform;
             PositionOffset = transform.position - AttachedParent.position;
@@ -60,6 +67,23 @@ public class P_Grenade : MonoBehaviour
             if (ObjectsInRange.Count() > 0) {
                 foreach (var Obj in ObjectsInRange) {
                     Obj.GetComponent<Health>().TakeDamage(Damage);
+
+                    var ObjRB = Obj.GetComponent<Rigidbody>();
+                    if(ObjRB != null) {
+                        float Dist = Vector3.Distance(Obj.transform.position, transform.position);  
+
+                        Vector3 Dir = (Obj.transform.position - transform.position).normalized;
+
+                        var ObjController = Obj.GetComponent<PlayerController>();
+
+                        if(ObjController == null) {
+                            // Apply force: scaled by the knockback force and the force multiplier
+                            ObjRB.AddExplosionForce(KnockbackForce, transform.position, ExplosionRange, 1f, ForceMode.Impulse);
+                        } else {
+                            Debug.Log(KnockbackForce * Dir);
+                            ObjController.AddFrameForce(KnockbackForce * Dir, false);
+                        }
+                    }
                 }
             }
         }

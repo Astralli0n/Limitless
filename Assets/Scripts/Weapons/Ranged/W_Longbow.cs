@@ -42,6 +42,6 @@ public class W_Longbow : T_Ranged
         var FireDMG = (HoldDuration * (MaxDMG - Damage)) + Damage;
 
         GameObject Projectile = CheckFire(Player.AimDir);
-        Projectile.GetComponent<P_Bullet>().SetStats(FireRange, FireDMG, FirePoint.position, Player.transform);
+        Projectile.GetComponent<P_Arrow>().SetStats(FireRange, FireDMG, FirePoint.position, Player.transform);
     }
 }

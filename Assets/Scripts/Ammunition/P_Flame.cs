@@ -1,12 +1,13 @@
 using UnityEngine;
 
-public class P_Bullet : MonoBehaviour
+public class P_Flame : MonoBehaviour
 {
     [SerializeField] Transform Player;
     [SerializeField] float Range;
-    [SerializeField] float RangeCutoff;
-    [SerializeField] float MinDMG;
-    [SerializeField] float MaxDMG;
+    [SerializeField] float DMG;
+    [SerializeField] float TickDMG;
+    [SerializeField] float TickNum;
+    [SerializeField] float TickDelay;
     [SerializeField] Vector3 InitPos;
     bool DealtDMG = false;
 
@@ -17,29 +18,28 @@ public class P_Bullet : MonoBehaviour
         }
     }
 
-    public void SetStats(float _Range, float Cutoff, float Min, float Max, Vector3 Pos, Transform Origin) {
+    public void SetStats(float _Range, float _DMG, float _TickDMG, float Delay, float Num, Vector3 Pos, Transform Origin) {
         Range = _Range;
-        RangeCutoff = Cutoff;
-        MinDMG = Min;
-        MaxDMG = Max;
+        DMG = _DMG;
         InitPos = Pos;
         Player = Origin;
-        Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
+
+        TickDMG = _TickDMG;
+        TickDelay = Delay;
+        TickNum = Num;
+
+        Debug.Log($"Bullet initialised w/ {TickDMG}");
     }
 
     void OnTriggerEnter(Collider Other)
     {
         var OtherHealth = Other.transform.GetComponent<Health>();
         if(DealtDMG || Other.transform == Player) { return; }
-
         if(OtherHealth != null) {
-            float DistMult = Mathf.Min(RangeCutoff, Vector3.Distance(InitPos, transform.position)) / RangeCutoff;
-            float DMG = DistMult * (MaxDMG - MinDMG) + MinDMG;
-
             OtherHealth.TakeDamage(DMG);
+            OtherHealth.ApplyStatusEffect("FIRE", TickNum, TickDelay, TickDMG, Time.time);
             DealtDMG = true;
-        } else {
-            Destroy(gameObject);
         }
+        Destroy(gameObject);
     }
 }

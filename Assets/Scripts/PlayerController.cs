@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,18 +5,33 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
+    #region References
     Rigidbody RB;
     CapsuleCollider PlayerCollider;
-    [Header("Movement")]
+    ConstantForce _ConstantForce;
+    #endregion
+
+    [Header("Movement"), Space]
     [SerializeField] float RunSpeed;
     [SerializeField] float StrafeSpeed;
     [SerializeField] float BackSpeed;
     [SerializeField] float Acceleration;
-    [SerializeField] float Deceleration;
-    [SerializeField] MovementState State;
-    [SerializeField] PostureState Posture;
-    [SerializeField] float StateLerpTime;
+    [SerializeField] float Friction;
+    [SerializeField] float AirFrictionMult;
+    [SerializeField] float DirectionCorrectionMult;
 
+    [Header("External Forces"), Space]
+    [SerializeField] float ExternalVelocityDecayRate;
+    Vector3 FrameTransientVel;
+    Vector3 DecayingTransientVel;
+    Vector3 TotalTransientVelAppliedLastFrame;
+    Vector3 ForceToApplyThisFrame;
+
+    [Header("States"), Space]
+    [SerializeField] MovementState CurrentMovementState;
+    [SerializeField] PostureState CurrentPostureState;
+    [SerializeField] float StateLerpTime;
+    float TargetSpeedModifier;
     public enum MovementState {
         Walk,
         Sprint,
@@ -30,7 +44,7 @@ public class PlayerController : MonoBehaviour
         Air
     }
 
-    [Header("Aiming")]
+    [Header("Aiming"), Space]
     [SerializeField] Vector2 MouseSensitivity;
     [SerializeField] Transform CameraHolder;
     [SerializeField] float CameraFOV;
@@ -40,7 +54,7 @@ public class PlayerController : MonoBehaviour
     Vector3 CameraDefaultPos;
     float xRot = 0f;
 
-    [Header("Sprinting")]
+    [Header("Sprinting"), Space]
     [SerializeField] float SprintSpeedModifier;
     [SerializeField] float SprintFOV;
     [SerializeField] float FOVLerpPower;
@@ -48,9 +62,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float MaxSprintVel;
     [SerializeField] float SprintAccelModifier;
     [SerializeField] float SprintLerpTime;
-    float TargetSpeedModifier;
 
-    [Header("Crouching & Sliding")]
+    [Header("Crouching & Sliding"), Space]
     [SerializeField] float CrouchSpeedModifier;
     [SerializeField] float CrouchCamModifier;
     [SerializeField] Transform CrouchOverlapPoint;
@@ -64,9 +77,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float SlideLerpTime;
     Vector3 DefaultColliderCentre;
     float DefaultColliderHeight;
-    
 
-    [Header("Grounding")]
+    [Header("Grounding"), Space]
     [SerializeField] Transform GroundCheckOrigin;
     [SerializeField] int RayNum;
     [SerializeField] float RayOriginDist;
@@ -76,24 +88,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float JumpBufferTime;
     float LastGroundedTime;
     float LastPressedJumpTime;
-    
-    [SerializeField] float GroundFriction;
-    [SerializeField] float AirFriction;
 
-    [Header("Jumping")]
+    [Header("Jumping"), Space]
     [SerializeField] float JumpForce;
+    [SerializeField] float ExtraConstantGravity;
     [SerializeField] float JumpCutForce;
     [SerializeField] float FallGravityForce;
     [SerializeField] float ApexModifier;
     [SerializeField] float ApexThreshold;
     [SerializeField] float ApexGravityForce;
-    [Header("Edge Detection")]
-    [SerializeField] float EdgeDetectionDistance;
-    [SerializeField] float EdgeStepHeight;
-    [SerializeField] float EdgeStepLerpSpeed;
     bool IsJumping;
-    public TMP_Text UI;//FOR DEBUGGING STATES
+
+    [Header("UI")]
+    public TMP_Text UI;
     public TMP_Text VelMeter;
+
     void Awake() {
         RB = GetComponent<Rigidbody>();
         Cam = CameraHolder.GetComponentInChildren<Camera>();
@@ -105,6 +114,7 @@ public class PlayerController : MonoBehaviour
 
         CrouchOverlapPoint.localPosition = CameraHolder.localPosition + Vector3.down * CrouchCamModifier;
 
+        _ConstantForce = GetComponent<ConstantForce>();
     }
 
     void Start() {
@@ -119,66 +129,146 @@ public class PlayerController : MonoBehaviour
         DEBUGLOGSTATES();
 
         HandleStates();
-        HandleEdgeDetection();
-        Timer();
     }
 
     void FixedUpdate() {
-        Run();
-        ApplyFriction();
+        RemoveTransientVelocity();
         CheckGrounded();
+        Move();
+        ForceToApplyThisFrame = Vector3.zero;
     }
 
-    void Run() {
-        Vector2 Input = InputManager.Instance.MoveInput;
+    void LateUpdate()
+    {
+        Timer();
+    }
 
-        float zSpeed = Input.y > 0 ? RunSpeed : (State == MovementState.Sprint || State == MovementState.Slide) ? 0 : BackSpeed;
-        Vector3 TargetVel = new Vector3(Input.x * StrafeSpeed, 0f, Input.y * zSpeed);
+    #region Movement
 
-
-        var T = Time.deltaTime / StateLerpTime;
-        var CurrentModifier = 1f;
-
-        if(State == MovementState.Sprint) {
-            CurrentModifier = SprintSpeedModifier;
-            T = Time.deltaTime / SprintLerpTime;
+    void Move() {
+        if (ForceToApplyThisFrame != Vector3.zero)
+        {
+            RB.linearVelocity += AdditionalFrameVelocities();
+            RB.AddForce(ForceToApplyThisFrame * RB.mass, ForceMode.Impulse);
+            return;
         }
 
-        if(Posture == PostureState.Crouch) {
-            CurrentModifier = CrouchSpeedModifier;
-            T = Time.deltaTime / CrouchLerpTime;
+        var ExtraForce = new Vector3(0f, 0f, 0f);
+
+        if(IsJumping) {
+            if(RB.linearVelocity.y > 0 && InputManager.Instance.JumpInputRelease) {
+                ExtraForce.y = -JumpCutForce;
+            } else if(RB.linearVelocity.y < 0) {
+                ExtraForce.y = -FallGravityForce;
+            } else if(Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
+                ExtraForce.y = ApexGravityForce;
+            }
         }
+        _ConstantForce.force = ExtraForce * RB.mass;
 
-        if(State == MovementState.Slide) {
-            CurrentModifier = SlideSpeedModifier;
-            T = Time.deltaTime / SlideLerpTime;
-        }
+        var Input = InputManager.Instance.MoveInput;
 
-        if(IsJumping && Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
-            CurrentModifier *= ApexModifier;
-        }
+        // Calculate movement direction in local space
+        Vector3 MoveDir = new Vector3(Input.x, 0f, Input.y).normalized;
 
-        TargetSpeedModifier = Mathf.Lerp(TargetSpeedModifier, 
-                                        CurrentModifier, 
-                                        T);
+        // Transform local direction to world space
+        Vector3 WorldMoveDir = transform.TransformDirection(MoveDir);
 
-        TargetVel *= TargetSpeedModifier;
-        
-        Vector3 SpeedDiff = transform.TransformDirection(TargetVel) - RB.linearVelocity;
+        // Calculate target speeds for X (strafe) and Z (forward/backward) axes
+        float TargetStrafeSpeed = StrafeSpeed;
+        float TargetZSpeed = Input.y > 0 ? RunSpeed : BackSpeed;
 
-        Vector2 AccelRate = new Vector2(
-            Mathf.Abs(Input.x) > 0.01f ? Acceleration : Deceleration,
-            Mathf.Abs(Input.y) > 0.01f ? Acceleration : Deceleration
+        // Apply state-based speed modifiers
+        float CurrentModifier = 1f;
+
+        if (CurrentMovementState == MovementState.Sprint) CurrentModifier = SprintSpeedModifier;
+        if (CurrentPostureState == PostureState.Crouch) CurrentModifier = CrouchSpeedModifier;
+        if (CurrentMovementState == MovementState.Slide) CurrentModifier = SlideSpeedModifier;
+
+        TargetSpeedModifier = Mathf.Lerp(TargetSpeedModifier, CurrentModifier, Time.deltaTime / StateLerpTime);
+
+        // Apply modifiers to speeds
+        TargetStrafeSpeed *= TargetSpeedModifier;
+        TargetZSpeed *= TargetSpeedModifier;
+
+        // Calculate acceleration/friction
+        Vector3 Step = new Vector3(
+            (Input.x == 0 ? Friction : Acceleration) * Time.deltaTime,
+            0,
+            (Input.y == 0 ? Friction : Acceleration) * Time.deltaTime
         );
 
-        if(State == MovementState.Slide) {
-            AccelRate *= SlideAccelModifier;
+        if (LastGroundedTime != JumpCoyoteTime) Step *= AirFrictionMult;
+        if (CurrentMovementState == MovementState.Slide) { Step *= SlideAccelModifier; }
+
+        // Get trimmed velocity (ignore vertical movement)
+        Vector3 TrimmedVel = transform.InverseTransformDirection(new Vector3(RB.linearVelocity.x, 0, RB.linearVelocity.z));
+
+        // Apply direction correction
+        if (Vector3.Dot(TrimmedVel.normalized, WorldMoveDir) < 0) Step *= DirectionCorrectionMult;
+
+        // Calculate target velocity in world space
+        Vector3 TargetVelocity = new Vector3(
+            MoveDir.x * TargetStrafeSpeed,
+            0,
+            MoveDir.z * TargetZSpeed
+        );
+
+        // Blend between current and target velocity
+        Vector3 Smoothed = transform.TransformDirection(new Vector3(Mathf.MoveTowards(TrimmedVel.x, TargetVelocity.x, Step.x),
+                                        0f,
+                                        Mathf.MoveTowards(TrimmedVel.z, TargetVelocity.z, Step.z)));
+
+        // Apply final velocity
+        RB.linearVelocity = Smoothed + Vector3.up * RB.linearVelocity.y + AdditionalFrameVelocities();
+    }
+    #endregion
+
+    #region External Velocity
+
+    void RemoveTransientVelocity() {
+        // Store the current velocity before applying changes
+        Vector3 currentVelocity = RB.linearVelocity;
+        Vector3 velocityBeforeReduction = currentVelocity;
+
+        // Subtract the transient velocity applied in the last frame
+        currentVelocity -= TotalTransientVelAppliedLastFrame;
+        RB.linearVelocity = currentVelocity;
+
+        // Reset transient velocity for this frame
+        FrameTransientVel = Vector3.zero;
+        TotalTransientVelAppliedLastFrame = Vector3.zero;
+
+        // Decay the transient velocity over time
+        float decay = Friction * AirFrictionMult * ExternalVelocityDecayRate; // Adjust decay rate as needed
+        if ((velocityBeforeReduction.x < 0 && DecayingTransientVel.x < velocityBeforeReduction.x) ||
+            (velocityBeforeReduction.x > 0 && DecayingTransientVel.x > velocityBeforeReduction.x) ||
+            (velocityBeforeReduction.y < 0 && DecayingTransientVel.y < velocityBeforeReduction.y) ||
+            (velocityBeforeReduction.y > 0 && DecayingTransientVel.y > velocityBeforeReduction.y) ||
+            (velocityBeforeReduction.z < 0 && DecayingTransientVel.z < velocityBeforeReduction.z) ||
+            (velocityBeforeReduction.z > 0 && DecayingTransientVel.z > velocityBeforeReduction.z)) {
+            decay *= 5; // Increase decay if velocity is moving away from the transient velocity
         }
 
-        Vector3 RunForce = new Vector3(SpeedDiff.x * AccelRate.x, 0f, SpeedDiff.z * AccelRate.y);
-        
-        RB.AddForce(RunForce);
+        // Smoothly reduce the decaying transient velocity
+        DecayingTransientVel = Vector3.MoveTowards(DecayingTransientVel, Vector3.zero, decay * Time.deltaTime);
     }
+    
+    Vector3 AdditionalFrameVelocities()
+    {
+        TotalTransientVelAppliedLastFrame = FrameTransientVel + DecayingTransientVel;
+        return TotalTransientVelAppliedLastFrame;
+    }
+
+    public void AddFrameForce(Vector3 Force, bool resetVelocity = false)
+    {
+        if (resetVelocity) RB.linearVelocity = Vector2.zero;
+        ForceToApplyThisFrame += Force;
+    }
+
+    #endregion
+
+    #region Aiming
 
     void Look() {
         Vector2 Input = InputManager.Instance.ViewInput;
@@ -199,7 +289,7 @@ public class PlayerController : MonoBehaviour
 
         var TargetFOV = CameraFOV;
 
-        if(State == MovementState.Sprint) {
+        if(CurrentMovementState == MovementState.Sprint) {
             TargetFOV = SprintFOV;
             T = Time.deltaTime / SprintLerpTime;
         }
@@ -211,25 +301,29 @@ public class PlayerController : MonoBehaviour
                                     T);
     }
 
+    #endregion
+
+    #region State Handling
+
     void HandleStates() {
-        bool OverlapWhileCrouching = CheckOverlap(CrouchOverlapPoint.position, Vector3.up, CrouchOverlapRayDist) && Posture == PostureState.Crouch;
+        bool OverlapWhileCrouching = CheckOverlap(CrouchOverlapPoint.position, Vector3.up, CrouchOverlapRayDist) && CurrentPostureState == PostureState.Crouch;
         
-        if (LastGroundedTime < 0 && State != MovementState.Sprint) {
-            Posture = PostureState.Air;
+        if (LastGroundedTime < 0 && CurrentMovementState != MovementState.Sprint) {
+            CurrentPostureState = PostureState.Air;
         } else if(InputManager.Instance.CrouchInput || OverlapWhileCrouching) {
-            Posture = PostureState.Crouch;
+            CurrentPostureState = PostureState.Crouch;
         } else {
-            Posture = PostureState.Stand;
+            CurrentPostureState = PostureState.Stand;
         }
 
-        bool VelAboveMinBound = State == MovementState.Sprint && RB.linearVelocity.magnitude >= MinSprintVel;
-        bool VelAboveMaxBound = State != MovementState.Sprint && RB.linearVelocity.magnitude >= MaxSprintVel; // This is to prevent instant switching over the boundary (Schmitt Trigger)
+        bool VelAboveMinBound = CurrentMovementState == MovementState.Sprint && RB.linearVelocity.magnitude >= MinSprintVel;
+        bool VelAboveMaxBound = CurrentMovementState != MovementState.Sprint && RB.linearVelocity.magnitude >= MaxSprintVel; // This is to prevent instant switching over the boundary (Schmitt Trigger)
 
         bool SprintVelWithinBounds = VelAboveMinBound || VelAboveMaxBound;
         bool ShouldSprint = false;
 
-        VelAboveMinBound = State == MovementState.Slide && RB.linearVelocity.magnitude >= MinSlideVel;
-        VelAboveMaxBound = State != MovementState.Slide && RB.linearVelocity.magnitude >= MaxSlideVel;
+        VelAboveMinBound = CurrentMovementState == MovementState.Slide && RB.linearVelocity.magnitude >= MinSlideVel;
+        VelAboveMaxBound = CurrentMovementState != MovementState.Slide && RB.linearVelocity.magnitude >= MaxSlideVel;
 
         bool SlideVelWithinBounds = VelAboveMinBound || VelAboveMaxBound;
         
@@ -237,71 +331,20 @@ public class PlayerController : MonoBehaviour
             ShouldSprint = true;
         }
         else {
-            State = MovementState.Walk;
+            CurrentMovementState = MovementState.Walk;
         }
         
 
-        if(Posture == PostureState.Crouch && SlideVelWithinBounds) {
-            State = MovementState.Slide;
-        } else if(ShouldSprint && (Posture == PostureState.Air && State == MovementState.Slide || Posture == PostureState.Stand && State != MovementState.Slide)) {
-            State = MovementState.Sprint;
+        if(CurrentPostureState == PostureState.Crouch && SlideVelWithinBounds) {
+            CurrentMovementState = MovementState.Slide;
+        } else if(ShouldSprint && (CurrentPostureState == PostureState.Air && CurrentMovementState == MovementState.Slide || CurrentPostureState == PostureState.Stand && CurrentMovementState != MovementState.Slide)) {
+            CurrentMovementState = MovementState.Sprint;
         }
     }
 
-    void HandleEdgeDetection()
-    {
-        if (Posture != PostureState.Air || RB.linearVelocity.magnitude < 0.1f) return;
+    #endregion
 
-        Vector3 ForwardDir = new Vector3(RB.linearVelocity.x, 0f, RB.linearVelocity.z);
-
-        Vector3 RayOrigin = RB.position + Vector3.up * EdgeStepHeight;
-
-        Debug.DrawRay(RayOrigin, ForwardDir * EdgeDetectionDistance, Color.green);
-
-        if(!Physics.Raycast(RayOrigin, ForwardDir, out RaycastHit Hit, EdgeDetectionDistance)) {
-            float Dist = Vector2.Distance(new Vector2(RB.position.x, RB.position.z), new Vector2(Hit.point.x, Hit.point.z));
-            RayOrigin = RayOrigin + ForwardDir * Dist;
-
-            Debug.DrawRay(RayOrigin, Vector3.down * EdgeStepHeight, Color.red);
-
-            if(Physics.Raycast(RayOrigin, Vector3.down, out RaycastHit TopHit, EdgeStepHeight, GroundLayer)) {
-                Vector3 TargetPos = ForwardDir + Vector3.up * (TopHit.point.y + PlayerCollider.height * 0.5f);
-                RB.MovePosition(Vector3.Lerp(RB.position, TargetPos, EdgeStepLerpSpeed));
-            }
-        }
-    }
-
-    void ApplyFriction() {
-        var Friction = Posture != PostureState.Air ? GroundFriction : AirFriction;
-        if(Mathf.Abs(InputManager.Instance.MoveInput.x) < 0.01f) {
-            float FrictionMagnitude = Mathf.Min(Mathf.Abs(RB.linearVelocity.x), Friction);
-            RB.AddForce(FrictionMagnitude * -Mathf.Sign(RB.linearVelocity.x), 0, 0);
-        }
-
-        if(Mathf.Abs(InputManager.Instance.MoveInput.y) < 0.01f) {
-            float FrictionMagnitude = Mathf.Min(Mathf.Abs(RB.linearVelocity.z), Friction);
-            RB.AddForce(0, 0, FrictionMagnitude * -Mathf.Sign(RB.linearVelocity.z));
-        }
-    }
-
-    List<Vector3> SpreadSpawnPositionsAroundOrigin() {
-        List<Vector3> RaySpawnPositions = new List<Vector3>
-        {
-            Vector3.zero
-        };
-
-        for (int i = 0; i < RayNum; i++)
-        {
-            float Angle = i * (Mathf.PI * 2 / RayNum);
-
-            Vector3 Offset = new Vector3(Mathf.Sin(Angle), 0f, Mathf.Cos(Angle));
-            Offset *= RayOriginDist;
-
-            RaySpawnPositions.Add(Offset);
-        }
-
-        return RaySpawnPositions;
-    }
+    #region Crouching
 
     void HandleCrouch() {
         var T = Time.deltaTime / CrouchLerpTime;
@@ -326,44 +369,26 @@ public class PlayerController : MonoBehaviour
         PlayerCollider.center = Vector3.Lerp(PlayerCollider.center, TargetColliderCentre, T); 
     }
 
-    void DEBUGLOGSTATES() {
-        string UITXT;
-        if (Posture == PostureState.Air) {
-            if(IsJumping) {
-                if(State == MovementState.Walk) {
-                    UITXT = "Jumping";
-                } else if(State == MovementState.Sprint) {
-                    UITXT = "Sprint Jumping";
-                } else {
-                    UITXT = "Slide Jumping";
-                }
-            } else {
-                if(State == MovementState.Walk) {
-                    UITXT = "Falling";
-                } else if(State == MovementState.Sprint) {
-                    UITXT = "Sprint Falling";
-                } else {
-                    UITXT = "Slide Falling";
-                }
-            }
-        } else if(Posture == PostureState.Crouch) {
-            if(State == MovementState.Walk) {
-                UITXT = "Crouching";
-            } else {
-                UITXT = "Sliding";
-            }
-        } else {
-            if(State == MovementState.Walk) {
-                UITXT = "Walking";
-            } else if(State == MovementState.Sprint) {
-                UITXT = "Sprinting";
-            } else {
-                UITXT = "Sliding";
-            }
+    #endregion
+
+    #region Collision
+    List<Vector3> SpreadSpawnPositionsAroundOrigin() {
+        List<Vector3> RaySpawnPositions = new List<Vector3>
+        {
+            Vector3.zero
+        };
+
+        for (int i = 0; i < RayNum; i++)
+        {
+            float Angle = i * (Mathf.PI * 2 / RayNum);
+
+            Vector3 Offset = new Vector3(Mathf.Sin(Angle), 0f, Mathf.Cos(Angle));
+            Offset *= RayOriginDist;
+
+            RaySpawnPositions.Add(Offset);
         }
 
-        UI.text = UITXT;
-        VelMeter.text = Mathf.Round(RB.linearVelocity.magnitude * 100f) / 100f  + " M/S";
+        return RaySpawnPositions;
     }
 
 
@@ -381,34 +406,34 @@ public class PlayerController : MonoBehaviour
     void CheckGrounded() {
         if(CheckOverlap(GroundCheckOrigin.position, Vector3.down, GroundRayDist)) {
             LastGroundedTime = JumpCoyoteTime;
+
+            _ConstantForce.force = Vector2.zero;
             
             if (IsJumping && RB.linearVelocity.y <= 0.1f) {
                 IsJumping = false;
             }
+
+            if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, GroundRayDist)) {
+                float distanceToGround = hit.distance;
+                float requiredCorrection = GroundRayDist - distanceToGround;
+                if (requiredCorrection > 0) {
+                    RB.MovePosition(RB.position + Vector3.down * requiredCorrection);
+                }
+            }
         }
     }
+
+    #endregion
+
+    #region Jumping
 
     void CheckJump() {
         if (InputManager.Instance.JumpInputPress) {
             OnJump();
         }
 
-        if (Posture != PostureState.Air && LastPressedJumpTime > 0 && !IsJumping) {
+        if (CurrentPostureState != PostureState.Air && LastPressedJumpTime > 0 && !IsJumping) {
             Jump();
-        }
-
-        if(IsJumping) {
-            if(InputManager.Instance.JumpInputRelease && RB.linearVelocity.y > 0) {
-                RB.AddForce(Vector3.down * JumpCutForce, ForceMode.Impulse);
-            }
-
-            if(RB.linearVelocity.y < 0) {
-                RB.AddForce(Vector3.down * FallGravityForce);
-            }
-
-            if(Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
-                RB.AddForce(Vector3.up * ApexGravityForce);
-            }
         }
     }
 
@@ -421,6 +446,48 @@ public class PlayerController : MonoBehaviour
         LastGroundedTime = 0;
         LastPressedJumpTime = 0;
         IsJumping = true;
+    }
+
+    #endregion
+
+    void DEBUGLOGSTATES() {
+        string UITXT;
+        if (CurrentPostureState == PostureState.Air) {
+            if(IsJumping) {
+                if(CurrentMovementState == MovementState.Walk) {
+                    UITXT = "Jumping";
+                } else if(CurrentMovementState == MovementState.Sprint) {
+                    UITXT = "Sprint Jumping";
+                } else {
+                    UITXT = "Slide Jumping";
+                }
+            } else {
+                if(CurrentMovementState == MovementState.Walk) {
+                    UITXT = "Falling";
+                } else if(CurrentMovementState == MovementState.Sprint) {
+                    UITXT = "Sprint Falling";
+                } else {
+                    UITXT = "Slide Falling";
+                }
+            }
+        } else if(CurrentPostureState == PostureState.Crouch) {
+            if(CurrentMovementState == MovementState.Walk) {
+                UITXT = "Crouching";
+            } else {
+                UITXT = "Sliding";
+            }
+        } else {
+            if(CurrentMovementState == MovementState.Walk) {
+                UITXT = "Walking";
+            } else if(CurrentMovementState == MovementState.Sprint) {
+                UITXT = "Sprinting";
+            } else {
+                UITXT = "Sliding";
+            }
+        }
+
+        UI.text = UITXT;
+        VelMeter.text = Mathf.Round(RB.linearVelocity.magnitude * 1000f) / 1000f  + " M/S";
     }
 
     void Timer() {

@@ -10,7 +10,7 @@ public class T_Ranged : Weapon
     [SerializeField] protected float ProjectileSpeed;
     [SerializeField] protected GameObject ProjectilePrefab;
 
-    protected bool CanFire() {
+    protected virtual bool CanFire() {
         if(CurrentAmmo <= 0) { return false; }
         if(InputManager.Instance.FireInputRelease && CurrUnloadTime < 0) {
             return true;

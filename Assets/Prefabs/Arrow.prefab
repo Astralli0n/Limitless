@@ -12,10 +12,10 @@ GameObject:
   - component: {fileID: 5367917823463381860}
   - component: {fileID: 196398439603365461}
   - component: {fileID: 2727169267383662811}
+  - component: {fileID: 3445148794439022193}
   - component: {fileID: 2959720320852375850}
-  - component: {fileID: 1825349817236487046}
   m_Layer: 0
-  m_Name: RG_Bullet
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -104,12 +104,28 @@ SphereCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3445148794439022193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1047940683127342286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea8f74c0d4663f0489f25304713d19ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Player: {fileID: 0}
+  Range: 0
+  DMG: 0
+  InitPos: {x: 0, y: 0, z: 0}
 --- !u!54 &2959720320852375850
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -137,20 +153,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!114 &1825349817236487046
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1047940683127342286}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed65371a288fd4d4992905d7a72c9b2b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Player: {fileID: 0}
-  Range: 0
-  MinDMG: 0
-  MaxDMG: 0
-  InitPos: {x: 0, y: 0, z: 0}

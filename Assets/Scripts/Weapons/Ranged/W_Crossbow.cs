@@ -45,7 +45,7 @@ public class W_Crossbow : T_Ranged
 
     void SetFireStats() {
         GameObject Projectile = CheckFire(Player.AimDir);
-        Projectile.GetComponent<P_Bullet>().SetStats(Range, Damage, FirePoint.position, Player.transform);
+        Projectile.GetComponent<P_Arrow>().SetStats(Range, Damage, FirePoint.position, Player.transform);
 
         ChargeShot = false;
     }
