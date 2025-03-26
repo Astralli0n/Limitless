@@ -14,7 +14,7 @@ public class W_Flamethrower : T_Ranged
 
     protected override bool CanFire() {
         if(CurrentAmmo <= 0) { return false; }
-        if(InputManager.Instance.FireInput && CurrUnloadTime < 0) {
+        if(InputManager.Instance.FireInput && CurrUnloadTime < 0 && IsActive) {
             return true;
         }
 

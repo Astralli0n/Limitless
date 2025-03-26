@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class Weapon : MonoBehaviour
 {
     [Header("Basic Stats")]
+    public bool IsActive;
     [SerializeField] protected float Damage;
     [SerializeField] protected float ReloadTime;
     [SerializeField] protected float UnloadTime;
@@ -41,19 +42,22 @@ public class Weapon : MonoBehaviour
     }
 
     protected virtual void CheckReload() {
-        if(!IsReloading && InputManager.Instance.ReloadInputPress && CurrentAmmo < MaxAmmo) {
+        if(!IsReloading && InputManager.Instance.ReloadInputPress && CurrentAmmo < MaxAmmo && IsActive) {
             Reload();
         }
 
         if(IsReloading) {
-            AmmoParent.GetComponent<Image>().enabled = true;
-            AmmoParent.GetComponent<Image>().fillAmount = (ReloadTime - CurrReloadTime) / ReloadTime / 2f;
+            if(IsActive) {
+                AmmoParent.GetComponent<Image>().enabled = true;
+                AmmoParent.GetComponent<Image>().fillAmount = (ReloadTime - CurrReloadTime) / ReloadTime / 2f;
+            }
+            
             if(CurrReloadTime < 0) {
-                AmmoParent.GetComponent<Image>().fillAmount = 0f;
+                if(IsActive) { AmmoParent.GetComponent<Image>().fillAmount = 0f; }
                 CurrentAmmo = MaxAmmo;
                 IsReloading = false;
             }
-        } else {
+        } else if(IsActive){
             AmmoParent.GetComponent<Image>().enabled = false;
         }
     }
@@ -107,8 +111,12 @@ public class Weapon : MonoBehaviour
     {
         while (true) // Run indefinitely
         {
-            CreateAmmoBar();
-            yield return new WaitForSeconds(0.2f); // Wait for 0.2 seconds
+            if(IsActive) {
+                CreateAmmoBar();
+                yield return new WaitForSeconds(0.2f); // Wait for 0.2 seconds
+            } else {
+                yield return null;
+            }
         }
     }
  }

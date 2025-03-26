@@ -13,13 +13,18 @@ public class W_Longbow : T_Ranged
         base.Awake();
         ChargeComponent = GetComponent<T_Chargeable>();
         Player = transform.GetComponentInParent<PlayerController>();
-        ChargeBar.enabled = true;
     }
 
     protected override void Update() {
+        if(!IsActive) {
+            return;
+        } else {
+            ChargeBar.enabled = true;
+        }
+        
         base.Update();
 
-        if (InputManager.Instance.FireInputPress && CurrentAmmo > 0) {
+        if (InputManager.Instance.FireInputPress && CurrentAmmo > 0 && IsActive) {
             ChargeComponent.StartCharging();
         }
 

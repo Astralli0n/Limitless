@@ -16,6 +16,8 @@ public class InputManager : MonoBehaviour
     public bool FireInputPress = false;
     public bool FireInputRelease = false;
     public bool ReloadInputPress;
+    public bool PreviousWeaponInputPress = false;
+    public bool NextWeaponInputPress = false;
 
     void Awake() {
         if(Instance == null) {
@@ -33,6 +35,9 @@ public class InputManager : MonoBehaviour
         FireInputRelease = false;
 
         ReloadInputPress = false;
+
+        PreviousWeaponInputPress = false;
+        NextWeaponInputPress = false;
     }
 
     public void SetMove(InputAction.CallbackContext CTX) {
@@ -79,6 +84,18 @@ public class InputManager : MonoBehaviour
     public void SetReload(InputAction.CallbackContext CTX) {
         if (CTX.phase == InputActionPhase.Performed) {
             ReloadInputPress = true;
+        }
+    }
+
+    public void SetPrevious(InputAction.CallbackContext CTX) {
+        if (CTX.phase == InputActionPhase.Performed) {
+            PreviousWeaponInputPress = true;
+        }
+    }
+
+    public void SetNext(InputAction.CallbackContext CTX) {
+        if (CTX.phase == InputActionPhase.Performed) {
+            NextWeaponInputPress = true;
         }
     }
 }

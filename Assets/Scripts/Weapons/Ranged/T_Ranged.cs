@@ -12,7 +12,7 @@ public class T_Ranged : Weapon
 
     protected virtual bool CanFire() {
         if(CurrentAmmo <= 0) { return false; }
-        if(InputManager.Instance.FireInputRelease && CurrUnloadTime < 0) {
+        if(InputManager.Instance.FireInputRelease && CurrUnloadTime < 0 && IsActive) {
             return true;
         }
 

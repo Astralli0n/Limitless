@@ -11,17 +11,20 @@ public class W_Crossbow : T_Ranged
         base.Awake();
         ChargeComponent = GetComponent<T_Chargeable>();
         Player = transform.GetComponentInParent<PlayerController>();
-        ChargeBar.enabled = true;
     }
 
     protected override void Update() {
-        base.Update();
-
-        if (InputManager.Instance.FireInputPress && CurrentAmmo > 0) {
+        if(!IsActive) {
+            return;
+        } else {
+            ChargeBar.enabled = true;
+        }
+        
+        if (InputManager.Instance.FireInputPress && CurrentAmmo > 0 && IsActive) {
             ChargeComponent.StartCharging();
         }
 
-        if(!ChargeShot) {
+        if (!ChargeShot) {
             if (ChargeComponent.IsCharging && CurrentAmmo > 0) {
                 ChargeComponent.UpdateCharging();
                 ChargeBar.fillAmount = ChargeComponent.GetChargeRatio() / 2f;
@@ -29,19 +32,23 @@ public class W_Crossbow : T_Ranged
                 ChargeBar.fillAmount = 0f;
             }
         }
-
-        if(CanFire()) {
-            if(!ChargeShot) {
-                if(ChargeComponent.GetChargeRatio() == 1) {
+        
+        // Process firing logic before base update
+        if (CanFire()) {
+            if (!ChargeShot) {
+                if (ChargeComponent.GetChargeRatio() == 1) {
                     ChargeShot = true;
                 }
             } else {
                 SetFireStats();
             }
-
+            
             ChargeComponent.StopCharging();
         }
+
+        base.Update();
     }
+
 
     void SetFireStats() {
         GameObject Projectile = CheckFire(Player.AimDir);
