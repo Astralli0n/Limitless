@@ -1,46 +1,100 @@
 using System.Collections.Generic;
 using UnityEngine;
+public class StatusEffectData {
+    public string Type;
+    public float TickNum;     // Total ticks (effect duration)
+    public float Delay;       // Time between ticks
+    public float DMG;         // Damage per tick
+    public float StartTime;   // When the effect was applied
+    public float TicksElapsed; // How many ticks have been processed
+    public List<Modifier> Modifiers; // Any extra modifiers for this effect
+
+    public StatusEffectData(string type, float tickNum, float delay, float dmg, float startTime, List<Modifier> modifiers) {
+        Type = type;
+        TickNum = tickNum;
+        Delay = delay;
+        DMG = dmg;
+        StartTime = startTime;
+        TicksElapsed = 1f;
+        Modifiers = modifiers;
+    }
+}
 
 public class Health : MonoBehaviour, IDamageable {
     [SerializeField] protected float CurrentHP;
     [SerializeField] protected float MaxHP;
-    [SerializeField] protected Dictionary<string, List<float>> StatusEffects; // {TYPE, TICK NUM, DELAY, TICK DAMAGE, START TICK TIME, TICKS REMAINING}
+
+    // Store all active status effects in a list
+    [SerializeField] protected List<StatusEffectData> ActiveStatusEffects;
+    protected bool WasKilled = false;
+
+    public event System.Action<float> OnHealthChanged; // Notify UI
 
     void Awake() {
         CurrentHP = MaxHP;
-        StatusEffects = new Dictionary<string, List<float>>();
+        ActiveStatusEffects = new List<StatusEffectData>();
     }
 
-    public void ApplyStatusEffect(string Type, float TickNum, float Delay, float DMG, float StartTime) {
-        if(StatusEffects.ContainsKey(Type)) { 
-            StatusEffects.Remove(Type);
+    // Now, ApplyStatusEffect adds a new status effect instance without replacing any existing one.
+    public void ApplyStatusEffect(string Type, float TickNum, float Delay, float DMG, float StartTime, List<GameObject> ModifierTypes) {
+        // Remove any existing status effect of the same type:
+        List<StatusEffectData> effectsToRemove = new List<StatusEffectData>();
+        foreach (var effect in ActiveStatusEffects) {
+            if (effect.Type == Type) {
+                // Reset (and thereby delete) all modifier GameObjects for this effect.
+                foreach (Modifier mod in effect.Modifiers) {
+                    mod.ResetModifier(); // This should destroy the modifier GameObject.
+                }
+                effectsToRemove.Add(effect);
+            }
         }
-
-        StatusEffects.Add(Type, new List<float>() {TickNum, Delay, DMG, StartTime, 1f});
+        // Remove the old effects from the list.
+        foreach (var effect in effectsToRemove) {
+            ActiveStatusEffects.Remove(effect);
+        }
+        
+        // Create new modifiers list:
+        List<Modifier> modifiers = new List<Modifier>();
+        if (ModifierTypes != null) {
+            foreach (var modType in ModifierTypes) {
+                if (modType == null) { continue; }
+                // Instantiate the prefab and get its Modifier component.
+                var newMod = Instantiate(modType, transform).GetComponent<Modifier>();
+                modifiers.Add(newMod);
+            }
+        }
+        
+        // Add the new status effect.
+        ActiveStatusEffects.Add(new StatusEffectData(Type, TickNum, Delay, DMG, StartTime, modifiers));
     }
 
     protected void HandleTicks() {
-        if(StatusEffects.Count == 0) { return; }
+        if (ActiveStatusEffects.Count == 0) return;
 
-        var EffectsToRemove = new List<string>();
+        // We'll use a temporary list for effects to remove.
+        List<StatusEffectData> EffectsToRemove = new List<StatusEffectData>();
 
-        foreach (var Status in StatusEffects)
-        {
-            if(Time.time > Status.Value[3] + Status.Value[4] * Status.Value[1]) {
-                TakeDamage(Status.Value[2]);
+        foreach (var effect in ActiveStatusEffects) {
+            // Check if it's time for the next tick.
+            if (Time.time >= effect.StartTime + effect.TicksElapsed * effect.Delay) {
+                // Apply damage for this tick.
+                TakeDamage(effect.DMG);
+                effect.TicksElapsed += 1f;
 
-                Status.Value[4] += 1f;
-                if(Status.Value[4] == Status.Value[0] + 1) {
-                    EffectsToRemove.Add(Status.Key);
+                // If we've processed more ticks than intended, mark the effect for removal.
+                if (effect.TicksElapsed > effect.TickNum) {
+                    EffectsToRemove.Add(effect);
                 }
             }
         }
 
-        if(EffectsToRemove.Count == 0) { return; }
-
-        foreach (var Status in EffectsToRemove)
-        {
-            StatusEffects.Remove(Status);
+        // Remove expired effects.
+        foreach (var effect in EffectsToRemove) {
+            // Also remove any modifier components that were added.
+            foreach (Modifier mod in effect.Modifiers) {
+                mod.ResetModifier();
+            }
+            ActiveStatusEffects.Remove(effect);
         }
     }
 
@@ -50,16 +104,31 @@ public class Health : MonoBehaviour, IDamageable {
 
     public virtual void TakeDamage(float Damage) {
         CurrentHP -= Damage;
-        if (CurrentHP <= 0) {
+        OnHealthChanged?.Invoke(CurrentHP / MaxHP); // Notify UI
+
+        if (CurrentHP <= 0 && !WasKilled) {
             Die();
         }
     }
 
     protected virtual void Die() {
         Debug.Log("ELIMINATED");
-        StatusEffects.Clear();
-        CurrentHP = MaxHP; // Reset if needed
+        WasKilled = true;
+        
+        // Create a temporary copy of the active effects to remove.
+        List<StatusEffectData> effectsToRemove = new List<StatusEffectData>(ActiveStatusEffects);
+        
+        foreach (var effect in effectsToRemove) {
+            foreach (Modifier mod in effect.Modifiers) {
+                mod.ResetModifier();
+            }
+            ActiveStatusEffects.Remove(effect);
+        }
+        
+        CurrentHP = MaxHP;
+        WasKilled = false;
     }
+
 
     public float GetHealth() {
         return CurrentHP;

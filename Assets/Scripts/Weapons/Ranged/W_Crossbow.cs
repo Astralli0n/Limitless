@@ -14,10 +14,14 @@ public class W_Crossbow : T_Ranged
     }
 
     protected override void Update() {
+        base.Update();
+
         if(!IsActive) {
             return;
         } else {
             ChargeBar.enabled = true;
+
+            if(ChargeShot) { ChargeBar.fillAmount = 0.5f;}
         }
         
         if (InputManager.Instance.FireInputPress && CurrentAmmo > 0 && IsActive) {
@@ -45,8 +49,6 @@ public class W_Crossbow : T_Ranged
             
             ChargeComponent.StopCharging();
         }
-
-        base.Update();
     }
 
 

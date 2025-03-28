@@ -12,8 +12,7 @@ public class P_Flame : MonoBehaviour
     bool DealtDMG = false;
 
     void LateUpdate() {
-        if(Vector3.Distance(transform.position, InitPos) > Range) {
-            Debug.Log("BULLET LEFT RANGE");
+        if(Vector3.Distance(transform.position, InitPos) >= Range) {
             Destroy(gameObject);
         }
     }
@@ -27,8 +26,6 @@ public class P_Flame : MonoBehaviour
         TickDMG = _TickDMG;
         TickDelay = Delay;
         TickNum = Num;
-
-        Debug.Log($"Bullet initialised w/ {TickDMG}");
     }
 
     void OnTriggerEnter(Collider Other)
@@ -37,7 +34,8 @@ public class P_Flame : MonoBehaviour
         if(DealtDMG || Other.transform == Player) { return; }
         if(OtherHealth != null) {
             OtherHealth.TakeDamage(DMG);
-            OtherHealth.ApplyStatusEffect("FIRE", TickNum, TickDelay, TickDMG, Time.time);
+            OtherHealth.ApplyStatusEffect("FIRE", TickNum, TickDelay, TickDMG, Time.time, null);
+            T_Ranged.RaiseOnAnyHit(OtherHealth);
             DealtDMG = true;
         }
         Destroy(gameObject);

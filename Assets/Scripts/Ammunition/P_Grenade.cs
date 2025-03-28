@@ -7,8 +7,6 @@ public class P_Grenade : MonoBehaviour
     [SerializeField] float Range;
     [SerializeField] float ExplosionRange;
     [SerializeField] float KnockbackForce;
-    [SerializeField] float InputFreezeDuration;
-    [SerializeField] float ForceDuration;
     [SerializeField] float Damage;
     [SerializeField] float Delay;
     [SerializeField] Vector3 InitPos;
@@ -22,23 +20,19 @@ public class P_Grenade : MonoBehaviour
         }
 
         // Range check
-        if (Vector3.Distance(transform.position, InitPos) > Range) {
-            Debug.Log("BULLET LEFT RANGE");
+        if (Vector3.Distance(transform.position, InitPos) >= Range) {
             Invoke("Explode", Delay);
         }
     }
 
-    public void SetStats(float _Range, float _ExplosionRange, float DMG, float _Delay, float FreezeDelay, float _ForceDuration, float Force, Vector3 Pos, Transform Origin) {
+    public void SetStats(float _Range, float _ExplosionRange, float DMG, float _Delay, float Force, Vector3 Pos, Transform Origin) {
         Range = _Range;
         ExplosionRange = _ExplosionRange;
         Damage = DMG;
         Delay = _Delay;
-        InputFreezeDuration = FreezeDelay;
-        ForceDuration = _ForceDuration;
         KnockbackForce = Force;
         InitPos = Pos;
         Player = Origin;
-        Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
     }
 
     void OnCollisionEnter(Collision Other)
@@ -58,7 +52,7 @@ public class P_Grenade : MonoBehaviour
         AttachedParent = null;
 
         transform.localScale = Vector3.one * ExplosionRange;
-
+        Destroy(gameObject, 0.2f);
         if (!DealtDMG) {
             var ObjectsInRange = Physics.OverlapSphere(transform.position, ExplosionRange)
                                         .Where(Obj => Obj.transform != transform)
@@ -67,6 +61,7 @@ public class P_Grenade : MonoBehaviour
             if (ObjectsInRange.Count() > 0) {
                 foreach (var Obj in ObjectsInRange) {
                     Obj.GetComponent<Health>().TakeDamage(Damage);
+                    T_Ranged.RaiseOnAnyHit(Obj.GetComponent<Health>());
 
                     var ObjRB = Obj.GetComponent<Rigidbody>();
                     if(ObjRB != null) {
@@ -89,6 +84,5 @@ public class P_Grenade : MonoBehaviour
         }
 
         DealtDMG = true;
-        Destroy(gameObject, 0.5f);
     }
 }

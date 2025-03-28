@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour
 {
@@ -92,7 +93,6 @@ public class PlayerController : MonoBehaviour
     [Header("Jumping"), Space]
     [SerializeField] float JumpForce;
     [SerializeField] float ExtraConstantGravity;
-    [SerializeField] float JumpCutForce;
     [SerializeField] float FallGravityForce;
     [SerializeField] float ApexModifier;
     [SerializeField] float ApexThreshold;
@@ -156,9 +156,7 @@ public class PlayerController : MonoBehaviour
         var ExtraForce = new Vector3(0f, 0f, 0f);
 
         if(IsJumping) {
-            if(RB.linearVelocity.y > 0 && InputManager.Instance.JumpInputRelease) {
-                ExtraForce.y = -JumpCutForce;
-            } else if(RB.linearVelocity.y < 0) {
+            if(RB.linearVelocity.y < 0) {
                 ExtraForce.y = -FallGravityForce;
             } else if(Mathf.Abs(RB.linearVelocity.y) < ApexThreshold) {
                 ExtraForce.y = ApexGravityForce;

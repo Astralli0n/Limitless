@@ -9,8 +9,7 @@ public class P_Arrow : MonoBehaviour
     bool DealtDMG = false;
 
     void LateUpdate() {
-        if(Vector3.Distance(transform.position, InitPos) > Range) {
-            Debug.Log("BULLET LEFT RANGE");
+        if(Vector3.Distance(transform.position, InitPos) >= Range) {
             Destroy(gameObject);
         }
     }
@@ -20,7 +19,6 @@ public class P_Arrow : MonoBehaviour
         DMG = _DMG;
         InitPos = Pos;
         Player = Origin;
-        Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
     }
 
     void OnTriggerEnter(Collider Other)
@@ -28,6 +26,7 @@ public class P_Arrow : MonoBehaviour
         var OtherHealth = Other.transform.GetComponent<Health>();
         if(DealtDMG || Other.transform == Player) { return; }
         if(OtherHealth != null) {
+            T_Ranged.RaiseOnAnyHit(OtherHealth);
             OtherHealth.TakeDamage(DMG);
             DealtDMG = true;
         }

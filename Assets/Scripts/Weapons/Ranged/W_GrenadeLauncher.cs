@@ -7,8 +7,6 @@ public class W_GrenadeLauncher : T_Ranged
     [SerializeField] float ExplosionRange;
     [SerializeField] float ExplosionDelay;
     [SerializeField] float KnockbackForce;
-    [SerializeField] float InputFreezeDuration;
-    [SerializeField] float ForceDuration;
     protected override void Awake() {
         base.Awake();
         Player = transform.GetComponentInParent<PlayerController>();
@@ -24,7 +22,7 @@ public class W_GrenadeLauncher : T_Ranged
 
     void SetFireStats() {
         GameObject Projectile = CheckFire(Player.AimDir);
-        Projectile.GetComponent<P_Grenade>().SetStats(Range, ExplosionRange, Damage, ExplosionDelay, InputFreezeDuration, ForceDuration, KnockbackForce, FirePoint.position, Player.transform);
+        Projectile.GetComponent<P_Grenade>().SetStats(Range, ExplosionRange, Damage, ExplosionDelay, KnockbackForce, FirePoint.position, Player.transform);
     }
 
     protected override void CheckReload()

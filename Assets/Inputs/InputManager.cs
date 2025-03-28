@@ -57,7 +57,6 @@ public class InputManager : MonoBehaviour
 
         else if (CTX.phase == InputActionPhase.Canceled) {
             JumpInputRelease = true;
-            Debug.Log("RELEASED");
         }
     }
 

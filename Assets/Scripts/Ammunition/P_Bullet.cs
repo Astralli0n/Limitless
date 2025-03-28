@@ -11,8 +11,7 @@ public class P_Bullet : MonoBehaviour
     bool DealtDMG = false;
 
     void LateUpdate() {
-        if(Vector3.Distance(transform.position, InitPos) > Range) {
-            Debug.Log("BULLET LEFT RANGE");
+        if(Vector3.Distance(transform.position, InitPos) >= Range) {
             Destroy(gameObject);
         }
     }
@@ -24,7 +23,6 @@ public class P_Bullet : MonoBehaviour
         MaxDMG = Max;
         InitPos = Pos;
         Player = Origin;
-        Debug.Log($"Bullet Initialized: Range={Range}, InitPos={InitPos}, Speed={GetComponent<Rigidbody>().linearVelocity.magnitude}");
     }
 
     void OnTriggerEnter(Collider Other)
@@ -36,6 +34,7 @@ public class P_Bullet : MonoBehaviour
             float DistMult = Mathf.Min(RangeCutoff, Vector3.Distance(InitPos, transform.position)) / RangeCutoff;
             float DMG = DistMult * (MaxDMG - MinDMG) + MinDMG;
 
+            T_Ranged.RaiseOnAnyHit(OtherHealth);
             OtherHealth.TakeDamage(DMG);
             DealtDMG = true;
         } else {

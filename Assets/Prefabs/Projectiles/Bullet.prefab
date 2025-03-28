@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 196398439603365461}
   - component: {fileID: 2727169267383662811}
   - component: {fileID: 2959720320852375850}
-  - component: {fileID: -5582027485345506679}
+  - component: {fileID: 1825349817236487046}
   m_Layer: 0
-  m_Name: Flame
+  m_Name: Bullet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134,10 +134,10 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!114 &-5582027485345506679
+--- !u!114 &1825349817236487046
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,13 +146,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1047940683127342286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90dbd6ad3d5875c4295cfe650456a133, type: 3}
+  m_Script: {fileID: 11500000, guid: ed65371a288fd4d4992905d7a72c9b2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 0}
   Range: 0
-  DMG: 0
-  TickDMG: 0
-  TickNum: 0
-  TickDelay: 0
+  RangeCutoff: 0
+  MinDMG: 0
+  MaxDMG: 0
   InitPos: {x: 0, y: 0, z: 0}

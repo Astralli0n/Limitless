@@ -27,7 +27,6 @@ public class Weapon : MonoBehaviour
     protected bool IsReloading;
 
     protected virtual void Awake() {
-        Debug.Log($"Weapon Awake: CurrentAmmo set to {CurrentAmmo}");
         ChargeBar = GetComponentInParent<PlayerController>().transform.GetComponentsInChildren<Image>(true)
                     .FirstOrDefault(Img => Img.gameObject.name == "ChargeBar");
 

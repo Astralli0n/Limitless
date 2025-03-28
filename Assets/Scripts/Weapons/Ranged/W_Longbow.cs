@@ -16,13 +16,13 @@ public class W_Longbow : T_Ranged
     }
 
     protected override void Update() {
+        base.Update();
+        
         if(!IsActive) {
             return;
         } else {
             ChargeBar.enabled = true;
         }
-        
-        base.Update();
 
         if (InputManager.Instance.FireInputPress && CurrentAmmo > 0 && IsActive) {
             ChargeComponent.StartCharging();
