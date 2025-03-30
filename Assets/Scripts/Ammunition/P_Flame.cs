@@ -34,8 +34,8 @@ public class P_Flame : MonoBehaviour
         if(DealtDMG || Other.transform == Player) { return; }
         if(OtherHealth != null) {
             OtherHealth.TakeDamage(DMG);
-            OtherHealth.ApplyStatusEffect("FIRE", TickNum, TickDelay, TickDMG, Time.time, null);
-            T_Ranged.RaiseOnAnyHit(OtherHealth);
+            OtherHealth.ApplyStatusEffect("FIRE", TickNum, TickDelay, TickDMG, Time.time, null, Player.gameObject);
+            Weapon.InvokeOnAnyHit(OtherHealth, Player.gameObject, DMG, false);
             DealtDMG = true;
         }
         Destroy(gameObject);

@@ -26,7 +26,7 @@ public class P_Arrow : MonoBehaviour
         var OtherHealth = Other.transform.GetComponent<Health>();
         if(DealtDMG || Other.transform == Player) { return; }
         if(OtherHealth != null) {
-            T_Ranged.RaiseOnAnyHit(OtherHealth);
+            Weapon.InvokeOnAnyHit(OtherHealth, Player.gameObject, DMG, false);
             OtherHealth.TakeDamage(DMG);
             DealtDMG = true;
         }

@@ -34,7 +34,7 @@ public class P_Bullet : MonoBehaviour
             float DistMult = Mathf.Min(RangeCutoff, Vector3.Distance(InitPos, transform.position)) / RangeCutoff;
             float DMG = DistMult * (MaxDMG - MinDMG) + MinDMG;
 
-            T_Ranged.RaiseOnAnyHit(OtherHealth);
+            Weapon.InvokeOnAnyHit(OtherHealth, Player.gameObject, DMG, false);
             OtherHealth.TakeDamage(DMG);
             DealtDMG = true;
         } else {

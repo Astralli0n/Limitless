@@ -8,6 +8,7 @@ public class Modifier : MonoBehaviour
         Control,
         Defence
     }
+    public GameObject Player;
 
     public virtual void ResetModifier() {
         Destroy(gameObject);

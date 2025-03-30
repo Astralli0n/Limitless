@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,6 @@ public class Weapon : MonoBehaviour
 
     [Header("Ammo")]
     [SerializeField] protected GameObject AmmoSegment;
-    [SerializeField] protected float AmmoSpacing;
     [SerializeField] protected int CurrentAmmo;
     protected float CurrReloadTime;
     protected float CurrUnloadTime;
@@ -25,6 +25,7 @@ public class Weapon : MonoBehaviour
     protected Transform AmmoParent;
     protected List<Image> AmmoBar;
     protected bool IsReloading;
+    public static event Action<Health, GameObject, float, bool> OnAnyHit;
 
     protected virtual void Awake() {
         ChargeBar = GetComponentInParent<PlayerController>().transform.GetComponentsInChildren<Image>(true)
@@ -35,9 +36,23 @@ public class Weapon : MonoBehaviour
         CurrentAmmo = MaxAmmo;
         StartCoroutine(UpdateAmmoBarRoutine());
     }
+
+    public static void InvokeOnAnyHit(Health EnemyHealth, GameObject Player, float DMG, bool IsTick)
+    {
+        OnAnyHit?.Invoke(EnemyHealth, Player, DMG, IsTick);
+    }
     
-    protected List<int> ReturnAmmoStats() {
+    public List<int> ReturnAmmoStats() {
         return new List<int> {CurrentAmmo, MaxAmmo};
+    }
+
+    public void SetAmmo(int Current, int Max) {
+        CurrentAmmo = Current;
+        MaxAmmo = Max;
+
+        StopAllCoroutines();
+
+        StartCoroutine(UpdateAmmoBarRoutine());
     }
 
     protected virtual void CheckReload() {
@@ -92,14 +107,14 @@ public class Weapon : MonoBehaviour
         
         for (int i = 0; i < CurrentAmmo; i++)
         {
-            float Angle = InitAngle + (EndAngle - InitAngle) * (i - 0.5f) / (MaxAmmo - 1);
+            float Angle = InitAngle + (EndAngle - InitAngle) * (i - 0.5f) / (Mathf.Max(CurrentAmmo, MaxAmmo) - 1);
             
             GameObject Segment = Instantiate(AmmoSegment, AmmoParent);
             Segment.name = $"AmmoSegment_{i}";
             
             Segment.GetComponent<RectTransform>().localPosition = Vector3.zero;
             Segment.GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, Angle - 90);
-            Segment.GetComponent<Image>().fillAmount = 0.5f / MaxAmmo;
+            Segment.GetComponent<Image>().fillAmount = 0.5f / Mathf.Max(CurrentAmmo, MaxAmmo);
             
             AmmoBar.Add(Segment.GetComponent<Image>());
         }

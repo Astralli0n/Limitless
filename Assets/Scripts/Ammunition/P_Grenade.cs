@@ -61,7 +61,7 @@ public class P_Grenade : MonoBehaviour
             if (ObjectsInRange.Count() > 0) {
                 foreach (var Obj in ObjectsInRange) {
                     Obj.GetComponent<Health>().TakeDamage(Damage);
-                    T_Ranged.RaiseOnAnyHit(Obj.GetComponent<Health>());
+                    Weapon.InvokeOnAnyHit(Obj.GetComponent<Health>(), Player.gameObject, Damage, false);
 
                     var ObjRB = Obj.GetComponent<Rigidbody>();
                     if(ObjRB != null) {

@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class T_Ranged : Weapon
@@ -6,13 +5,19 @@ public class T_Ranged : Weapon
     [SerializeField] bool IsProjectileBased;
     [Header("Ranged Stats")]
     [SerializeField] protected float Range;
+    [SerializeField] protected Vector3 Spread;
+    CameraController CamController;
 
     [Header("Projectile Stats")]
     [SerializeField] protected float ProjectileSpeed;
     [SerializeField] protected GameObject ProjectilePrefab;
 
     // Global event for any hit – both projectile and hitscan can invoke it.
-    public static event Action<Health> OnAnyHit;
+
+    protected override void Awake() {
+        base.Awake();
+        CamController = GetComponentInParent<PlayerController>().GetComponentInChildren<CameraController>();
+    }
 
     protected virtual bool CanFire() {
         if (CurrentAmmo <= 0) { return false; }
@@ -38,11 +43,13 @@ public class T_Ranged : Weapon
     }
 
     protected GameObject ProjectileFire(Vector3 AimDir) {
-        Vector3 ShootForce = AimDir * ProjectileSpeed;
-        Quaternion AimRot = Quaternion.LookRotation(AimDir, Vector3.up);    
+        CamController.RecoilFire(Spread);
+        Vector3 ShootForce = AimDir.normalized * ProjectileSpeed;
+        Quaternion AimRot = Quaternion.LookRotation(AimDir, Vector3.up);
+
 
         GameObject Projectile = Instantiate(ProjectilePrefab, FirePoint.position, AimRot);
-        Projectile.GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        Projectile.GetComponent<Rigidbody>().linearVelocity = GetComponentInParent<Rigidbody>().linearVelocity;
         Projectile.GetComponent<Rigidbody>().AddForce(ShootForce, ForceMode.Impulse);
         return Projectile;
     }
@@ -50,20 +57,17 @@ public class T_Ranged : Weapon
     protected void HitscanFire(Vector3 AimDir) {
         RaycastHit Hit;
 
+        CamController.RecoilFire(Spread);
+
         if (Physics.Raycast(FirePoint.position, AimDir, out Hit, Range)) {
             Debug.DrawRay(FirePoint.position, AimDir * Hit.distance, Color.red, 1.0f);
             // If the hit object has a Health component, trigger the hit event.
             if (Hit.collider.TryGetComponent<Health>(out Health EnemyHealth)) {
-                OnAnyHit?.Invoke(EnemyHealth);
+                InvokeOnAnyHit(EnemyHealth, gameObject, Damage, false);
             }
         } else {
             Debug.DrawRay(FirePoint.position, AimDir * Range, Color.yellow, 1.0f);
         }
-    }
-
-    public static void RaiseOnAnyHit(Health EnemyHealth)
-    {
-        OnAnyHit?.Invoke(EnemyHealth);
     }
 
     protected override void Update() {
