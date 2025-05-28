@@ -12,6 +12,8 @@ public class InputManager : MonoBehaviour
     public bool JumpInputRelease = false;
     public bool SprintInput;
     public bool CrouchInput;
+    public bool CrouchInputPress = false;
+    public bool CrouchInputRelease = false;
     public bool FireInput;
     public bool FireInputPress = false;
     public bool FireInputRelease = false;
@@ -30,6 +32,9 @@ public class InputManager : MonoBehaviour
     void LateUpdate() {
         JumpInputPress = false;
         JumpInputRelease = false;
+
+        CrouchInputPress = false;
+        CrouchInputRelease = false;
 
         FireInputPress = false;
         FireInputRelease = false;
@@ -78,6 +83,14 @@ public class InputManager : MonoBehaviour
 
     public void SetCrouch(InputAction.CallbackContext CTX) {
         CrouchInput = CTX.ReadValue<float>() > 0f;
+
+        if (CTX.phase == InputActionPhase.Performed) {
+            CrouchInputPress = true;
+        }
+
+        else if (CTX.phase == InputActionPhase.Canceled) {
+            CrouchInputRelease = true;
+        }
     }
 
     public void SetReload(InputAction.CallbackContext CTX) {

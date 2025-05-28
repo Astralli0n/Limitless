@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using TMPro;
-using UnityEngine.Windows;
 
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider), typeof(ConstantForce))]
 public class PlayerController : MonoBehaviour
 {
     #region References
