@@ -2,6 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
+using UnityEngine.VFX;
 
 public class Player : MonoBehaviour
 {
@@ -10,9 +11,10 @@ public class Player : MonoBehaviour
 
     [SerializeField] CameraSpring CamSpring;
     [SerializeField] CameraLean CamLean;
-    [SerializeField] CameraMotionFX CamMotionFX;
+    [SerializeField] CameraMotionEffects CamMotionFX;
     [SerializeField] Volume _Volume;
     [SerializeField] StanceVignette _StanceVignette;
+    [SerializeField] VisualEffect SpeedLineEffect;
 
     PlayerControls Controls;
 
@@ -32,7 +34,7 @@ public class Player : MonoBehaviour
 
         CamSpring.Initialise();
         CamLean.Initialise();
-        CamMotionFX.Initialise(Camera.GetComponentInChildren<Camera>(), _Volume.profile);
+        CamMotionFX.Initialise(Camera.GetComponentInChildren<Camera>(), _Volume.profile, SpeedLineEffect);
 
         _StanceVignette.Initialise(_Volume.profile);
 
@@ -77,15 +79,18 @@ public class Player : MonoBehaviour
     {
         var DeltaTime = Time.deltaTime;
         var CameraTarget = Character.GetCameraTarget();
+        
         var State = Character.GetState();
+        var LastState = Character.GetLastState();
 
         Camera.UpdatePosition(CameraTarget);
 
         CamSpring.UpdateSpring(DeltaTime, CameraTarget.up);
         CamLean.UpdateLean(DeltaTime, State.Acceleration, State.Stance, CameraTarget.up);
 
-        CamMotionFX.UpdateFOV(DeltaTime, State.Velocity.magnitude, State.Stance);
-        CamMotionFX.UpdateAberration(DeltaTime, State.Velocity.magnitude, State.Stance);
+        CamMotionFX.UpdateFOV(DeltaTime, State.Velocity, LastState.Velocity, State.Stance);
+        CamMotionFX.UpdateAberration(DeltaTime, State.Velocity.magnitude, State.Acceleration.magnitude, State.Stance);
+        CamMotionFX.UpdateSpeedLines(DeltaTime, State.Velocity.magnitude, State.Stance);
 
         _StanceVignette.UpdateVignette(DeltaTime, State.Stance);
     }

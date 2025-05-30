@@ -2547,9 +2547,10 @@ MonoBehaviour:
   Camera: {fileID: 409897198}
   CamSpring: {fileID: 2017031023}
   CamLean: {fileID: 857466917}
-  CamMotionFX: {fileID: 770148113}
+  CamMotionFX: {fileID: 1459695657}
   _Volume: {fileID: 1310274332}
   _StanceVignette: {fileID: 1797261876}
+  SpeedLineEffect: {fileID: 1429941921}
 --- !u!120 &460095356
 LineRenderer:
   serializedVersion: 2
@@ -3641,64 +3642,6 @@ Transform:
   - {fileID: 596980519}
   m_Father: {fileID: 306155441}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &770148111
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 770148112}
-  - component: {fileID: 770148113}
-  m_Layer: 0
-  m_Name: CameraMotionFX
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &770148112
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 770148111}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1646761000}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &770148113
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 770148111}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4fe51a4c7f0e549ae142a06fbdbb7f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WalkFOVRange: {x: 55, y: 65}
-  WalkAberrationRange: {x: 0, y: 0.4}
-  WalkSpeedRange: {x: 0, y: 15}
-  SprintFOVRange: {x: 70, y: 80}
-  SprintAberrationRange: {x: 0.4, y: 0.7}
-  SprintSpeedRange: {x: 15, y: 25}
-  CrouchFOVRange: {x: 60, y: 60}
-  CrouchAberrationRange: {x: 0, y: 0.2}
-  CrouchSpeedRange: {x: 0, y: 10}
-  SlideFOVRange: {x: 50, y: 80}
-  SlideAberrationRange: {x: 0.8, y: 1}
-  SlideSpeedRange: {x: 0, y: 50}
-  FOVDamping: 0.05
-  AberrationDamping: 0.05
 --- !u!1 &772402837
 GameObject:
   m_ObjectHideFlags: 0
@@ -4347,6 +4290,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1520113090}
+  - {fileID: 1429941919}
   m_Father: {fileID: 2017031022}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &857466917
@@ -4363,10 +4307,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AttackDamping: 0.5
   DecayDamping: 0.3
-  WalkStrength: 0.075
-  SprintStrength: 0.125
+  WalkStrength: 0.025
+  SprintStrength: 0.075
   CrouchStrength: 0
-  SlideStrength: 0.2
+  SlideStrength: 0.15
   StrengthResponse: 5
 --- !u!1 &884721453
 GameObject:
@@ -7059,6 +7003,164 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1418197852}
   m_CullTransparentMesh: 1
+--- !u!1 &1429941918
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1429941919}
+  - component: {fileID: 1429941921}
+  - component: {fileID: 1429941920}
+  m_Layer: 0
+  m_Name: SpeedLines
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1429941919
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429941918}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 2.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 857466916}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!73398921 &1429941920
+VFXRenderer:
+  serializedVersion: 1
+  m_ObjectHideFlags: 2
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429941918}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 0
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!2083052967 &1429941921
+VisualEffect:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429941918}
+  m_Enabled: 1
+  m_Asset: {fileID: 8926484042661614526, guid: f7d7de0c1bef417448e0d3b76bcb18c2, type: 3}
+  m_InitialEventName: OnPlay
+  m_InitialEventNameOverriden: 1
+  m_StartSeed: 0
+  m_ResetSeedOnPlay: 1
+  m_AllowInstancing: 1
+  m_ResourceVersion: 1
+  m_PropertySheet:
+    m_Float:
+      m_Array:
+      - m_Value: 2.75
+        m_Name: Radius
+        m_Overridden: 1
+      - m_Value: 0
+        m_Name: SpawnRate
+        m_Overridden: 1
+    m_Vector2f:
+      m_Array:
+      - m_Value: {x: 20, y: 0.75}
+        m_Name: MaxScaleRange
+        m_Overridden: 1
+      - m_Value: {x: 10, y: 0.25}
+        m_Name: MinScaleRange
+        m_Overridden: 1
+    m_Vector3f:
+      m_Array: []
+    m_Vector4f:
+      m_Array: []
+    m_Uint:
+      m_Array: []
+    m_Int:
+      m_Array: []
+    m_Matrix4x4f:
+      m_Array: []
+    m_AnimationCurve:
+      m_Array: []
+    m_Gradient:
+      m_Array:
+      - m_Value:
+          serializedVersion: 2
+          key0: {r: 1, g: 1, b: 1, a: 1}
+          key1: {r: 1, g: 1, b: 1, a: 1}
+          key2: {r: 1, g: 1, b: 1, a: 1}
+          key3: {r: 0, g: 0, b: 0, a: 0}
+          key4: {r: 0, g: 0, b: 0, a: 0}
+          key5: {r: 0, g: 0, b: 0, a: 0}
+          key6: {r: 0, g: 0, b: 0, a: 0}
+          key7: {r: 0, g: 0, b: 0, a: 0}
+          ctime0: 0
+          ctime1: 65535
+          ctime2: 65535
+          ctime3: 0
+          ctime4: 0
+          ctime5: 0
+          ctime6: 0
+          ctime7: 0
+          atime0: 0
+          atime1: 65535
+          atime2: 65535
+          atime3: 65535
+          atime4: 0
+          atime5: 0
+          atime6: 0
+          atime7: 0
+          m_Mode: 0
+          m_ColorSpace: 1
+          m_NumColorKeys: 2
+          m_NumAlphaKeys: 2
+        m_Name: ColorGradient
+        m_Overridden: 1
+    m_NamedObject:
+      m_Array: []
+    m_Bool:
+      m_Array: []
 --- !u!1 &1456899794
 GameObject:
   m_ObjectHideFlags: 0
@@ -7167,6 +7269,70 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1456899794}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1459695655
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1459695656}
+  - component: {fileID: 1459695657}
+  m_Layer: 0
+  m_Name: CameraMotionEffects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1459695656
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459695655}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1646761000}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1459695657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1459695655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7f704af69b797840ab879ccc37e6b05, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DivergenceAngle: 90
+  WalkFOVMotionRange: {x: 0, y: 15}
+  SprintFOVMotionRange: {x: 15, y: 25}
+  CrouchFOVMotionRange: {x: 0, y: 10}
+  SlideFOVMotionRange: {x: 0, y: 60}
+  WalkFOVRange: {x: 60, y: 65}
+  SprintFOVRange: {x: 75, y: 90}
+  CrouchFOVRange: {x: 60, y: 60}
+  SlideFOVRange: {x: 45, y: 90}
+  FOVDamping: 0.5
+  AberrationMotionRange: {x: 0, y: 30}
+  AberrationAccelerationRange: {x: 30, y: 90}
+  AberrationFluctuationRange: {x: 0.5, y: 3}
+  AberrationVariance: 0.1
+  AberrationDamping: 0.15
+  SprintSpeedLineMotionRange: {x: 10, y: 25}
+  SprintSpawnRateRange: {x: 50, y: 150}
+  SlideSpeedLineMotionRange: {x: 10, y: 45}
+  SlideSpawnRateRange: {x: 50, y: 250}
+  SpeedLineDamping: 0.1
 --- !u!1 &1479242878
 GameObject:
   m_ObjectHideFlags: 0
@@ -8114,21 +8280,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a12dfb0eab0e3448427858d0e8a0ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Motor: {fileID: 0}
+  Motor: {fileID: 1619113012}
   Root: {fileID: 494469179}
   CameraTarget: {fileID: 54096971}
   ForwardSpeed: 15
   BackwardSpeed: 10
   StrafeSpeed: 12.5
   WalkAccelerationResponse: 15
-  WalkDecelerationResponse: 25
+  WalkDecelerationResponse: 45
   WalkThreshold: 0.2
   VelocityFilterTau: 0.05
   NormalFilterTau: 0.1
   Gravity: -90
   AirSpeed: 15
   AirAcceleration: 120
-  AirDeceleration: 120
+  AirDeceleration: 480
   MaxFallSpeed: 75
   JumpSpeed: 20
   CoyoteTime: 0.2
@@ -8141,18 +8307,18 @@ MonoBehaviour:
   CrouchBackwardSpeed: 5
   CrouchStrafeSpeed: 7.5
   CrouchAccelerationResponse: 30
-  CrouchDecelerationResponse: 50
+  CrouchDecelerationResponse: 90
   StandHeight: 2
   CrouchHeight: 1
   StandCameraTargetHeight: 1
-  CrouchCameraTargetHeight: 0.5
+  CrouchCameraTargetHeight: 0.75
   CrouchHeightResponse: 15
-  SlamForce: 50
+  SlamForce: 75
   SlamHeightThreshold: 10
   SlideSpeed: 20
   SlideEndSpeed: 7.5
   SlideAcceleration: 5
-  SlideFriction: 4
+  SlideFriction: 2.5
   SlideSteerAcceleration: 2.5
   SlideGravity: -45
   SlopeAngleThreshold: 0.2
@@ -8163,7 +8329,7 @@ MonoBehaviour:
   SprintBackwardSpeed: 15
   SprintStrafeSpeed: 20
   SprintAccelerationResponse: 20
-  SprintDecelerationResponse: 15
+  SprintDecelerationResponse: 10
   SprintMinimumSpeed: 7.5
   SprintJumpSpeed: 30
   StanceText: {fileID: 1479242880}
@@ -8308,7 +8474,7 @@ Transform:
   m_Children:
   - {fileID: 1310274331}
   - {fileID: 1797261877}
-  - {fileID: 770148112}
+  - {fileID: 1459695656}
   m_Father: {fileID: 460095354}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1664616594

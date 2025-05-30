@@ -305,14 +305,12 @@ public class PlayerCharacter : MonoBehaviour, ICharacterController
         }
 
         Ray GroundCheck = new Ray(Motor.TransientPosition, -Motor.CharacterUp);
+        var EffectiveSlamForce = SlamForce;
         if (Physics.Raycast(GroundCheck, out RaycastHit Hit, SlamHeightThreshold, Motor.CollidableLayers, QueryTriggerInteraction.Ignore))
         {
-            RequestedSlam = false;
+            EffectiveSlamForce = Mathf.Lerp(0f, SlamHeightThreshold, Hit.distance);
         }
-        else
-        {
-            CurrentVelocity += -Motor.CharacterUp * SlamForce * DeltaTime;
-        }
+        CurrentVelocity += -Motor.CharacterUp * SlamForce * DeltaTime;
     }
 
     void CheckJump(ref Vector3 CurrentVelocity, float DeltaTime)
